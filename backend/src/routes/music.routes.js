@@ -64,14 +64,14 @@ router.post('/upload', auth, (req, res, next) => {
   }
 });
 
-// ── POST /add-url — add by URL ───────────────────────────────────
+// ── POST /add-url — add by URL (also used after direct Cloudinary upload) ──
 router.post('/add-url', auth, async (req, res) => {
   try {
-    const { url, title } = req.body;
+    const { url, title, filename } = req.body;
     if (!url) return res.status(400).json({ success: false, error: 'URL is required' });
     const music = new Music({
       title: title || url.split('/').pop().replace(/\.[^.]+$/, ''),
-      filename: url,
+      filename: filename || url,  // use Cloudinary public_id if provided
       path: url,
       size: 0,
     });

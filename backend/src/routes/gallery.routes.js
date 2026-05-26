@@ -81,13 +81,17 @@ router.post('/upload', auth, (req, res, next) => {
   }
 });
 
-// ── POST /add-url — add by URL ───────────────────────────────────
+// ── POST /add-url — add by URL (also used after direct Cloudinary upload) ──
 router.post('/add-url', auth, async (req, res) => {
   try {
-    const { url, type } = req.body;
+    const { url, type, filename } = req.body;
     if (!url) return res.status(400).json({ success: false, error: 'URL is required' });
     const mediaType = type || (/(mp4|webm|ogg|mov)/i.test(url) ? 'video' : 'image');
-    const galleryItem = new Gallery({ filename: url, path: url, type: mediaType });
+    const galleryItem = new Gallery({
+      filename: filename || url,  // use Cloudinary public_id if provided
+      path: url,
+      type: mediaType,
+    });
     await galleryItem.save();
     res.json({ success: true, galleryItem });
   } catch (error) {
