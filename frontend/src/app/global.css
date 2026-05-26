@@ -1,0 +1,141 @@
+/* frontend/src/app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: #07090f;
+  color: #e8eaf0;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(79, 156, 249, 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(79, 156, 249, 0.5);
+}
+
+/* Animations */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes twinkle {
+  from { opacity: 0.1; }
+  to { opacity: 0.5; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Loading Spinner */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(79, 156, 249, 0.2);
+  border-top-color: #4f9cf9;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Glass Effect */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Star animation */
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: white;
+  animation: twinkle infinite alternate;
+}
+
+/* Window animations */
+.window-enter {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.window-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 200ms, transform 200ms;
+}
+
+/* Context Menu Styles */
+.context-menu {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.menu-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.menu-item:hover {
+  background: rgba(79, 156, 249, 0.2);
+}
+
+.has-submenu::after {
+  content: "▶";
+  float: right;
+  opacity: 0.7;
+  font-size: 0.8em;
+}
+
+.sub-menu {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  border: 0.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  margin-left: 8px;
+  z-index: 1001;
+  overflow: hidden;
+  min-width: 180px;
+}
+
+.submenu-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.submenu-item:hover {
+  background: rgba(79, 156, 249, 0.2);
+}
