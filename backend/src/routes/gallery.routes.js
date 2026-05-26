@@ -6,81 +6,38 @@ const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cloudinary = require('../config/cloudinary');
 const multer = require('multer');
 
-// Configure storage for gallery files (images/videos)
+// Gallery storage — supports images AND videos
 const galleryStorage = new CloudinaryStorage({
   cloudinary,
-  params: {
-    folder: 'rafios-gallery',
-    allowed_formats: ['jpg', 'png', 'jpeg', 'gif', 'webp', 'mp4', 'webm', 'ogg']
-  }
+  params: async (req, file) => {
+    const isVideo = file.mimetype.startsWith('video/');
+    return {
+      folder: 'rafios-gallery',
+      resource_type: isVideo ? 'video' : 'image',
+      allowed_formats: ['jpg', 'png', 'jpeg', 'gif', 'webp', 'mp4', 'webm', 'mov'],
+      // Use original filename (sanitised)
+      public_id: `gallery_${Date.now()}_${Math.floor(Math.random() * 9999)}`,
+    };
+  },
 });
 
-const uploadGallery = multer({ storage: galleryStorage });
+const uploadGallery = multer({
+  storage: galleryStorage,
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB
+});
 
-// Get all gallery files
+// ── GET /list — public ───────────────────────────────────────────
 router.get('/list', async (req, res) => {
   try {
     const gallery = await Gallery.find().sort({ uploadedAt: -1 });
-    // Return just the paths for frontend consumption
-    const galleryPaths = gallery.map(g => g.path);
-    res.json(galleryPaths);
+    res.json(gallery.map(g => g.path));
   } catch (error) {
-    console.error('Error fetching gallery:', error);
+    console.error('Gallery list error:', error);
     res.status(500).json({ error: 'Failed to fetch gallery' });
   }
 });
 
-// Upload gallery file
-router.post('/upload', auth, uploadGallery.single('file'), async (req, res) => {
-  try {
-    const { filename, path, size, format } = req.file;
-    const type = format.startsWith('video') ? 'video' : 'image';
-    
-    const galleryItem = new Gallery({
-      filename,
-      path,
-      type,
-      size
-    });
-    
-    await galleryItem.save();
-    res.json({ success: true, galleryItem });
-  } catch (error) {
-    console.error('Error uploading gallery file:', error);
-    res.status(500).json({ success: false, error: 'Failed to upload gallery file' });
-  }
-});
-
-// Delete gallery file
-router.delete('/delete', auth, async (req, res) => {
-  try {
-    const { filename } = req.query;
-    const galleryItem = await Gallery.findOne({ filename });
-    
-    if (!galleryItem) {
-      return res.status(404).json({ success: false, error: 'Gallery file not found' });
-    }
-    
-    // Delete from Cloudinary
-    if (galleryItem.filename) {
-      try {
-        await cloudinary.uploader.destroy(galleryItem.filename);
-      } catch (cloudinaryError) {
-        console.warn('Cloudinary delete failed:', cloudinaryError);
-      }
-    }
-    
-    // Delete from database
-    await Gallery.deleteOne({ _id: galleryItem._id });
-    
-    res.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting gallery file:', error);
-    res.status(500).json({ success: false, error: 'Failed to delete gallery file' });
-  }
-});
-
-// Get all gallery files (admin - full objects with filename)
+// ── GET /items — admin full objects ──────────────────────────────
 router.get('/items', auth, async (req, res) => {
   try {
     const gallery = await Gallery.find().sort({ uploadedAt: -1 });
@@ -90,20 +47,67 @@ router.get('/items', auth, async (req, res) => {
   }
 });
 
-// Add gallery item by URL (no file upload)
+// ── POST /upload — file upload via Cloudinary ────────────────────
+router.post('/upload', auth, (req, res, next) => {
+  uploadGallery.single('file')(req, res, (err) => {
+    if (err) {
+      console.error('Multer/Cloudinary upload error:', err);
+      return res.status(500).json({ success: false, error: err.message || 'Upload failed' });
+    }
+    next();
+  });
+}, async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ success: false, error: 'No file received' });
+
+    const isVideo = req.file.mimetype?.startsWith('video/') ||
+                    req.file.resource_type === 'video';
+    const type = isVideo ? 'video' : 'image';
+
+    // Cloudinary returns secure_url and public_id on req.file
+    const path = req.file.path || req.file.secure_url;
+    const filename = req.file.filename || req.file.public_id;
+
+    const galleryItem = new Gallery({ filename, path, type, size: req.file.size || 0 });
+    await galleryItem.save();
+
+    res.json({ success: true, galleryItem });
+  } catch (error) {
+    console.error('Gallery save error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ── POST /add-url — add by URL ───────────────────────────────────
 router.post('/add-url', auth, async (req, res) => {
   try {
     const { url, type } = req.body;
     if (!url) return res.status(400).json({ success: false, error: 'URL is required' });
-    const mediaType = type || (/(mp4|webm|ogg)/i.test(url) ? 'video' : 'image');
-    const galleryItem = new Gallery({
-      filename: url,
-      path: url,
-      type: mediaType,
-    });
+    const mediaType = type || (/(mp4|webm|ogg|mov)/i.test(url) ? 'video' : 'image');
+    const galleryItem = new Gallery({ filename: url, path: url, type: mediaType });
     await galleryItem.save();
     res.json({ success: true, galleryItem });
   } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ── DELETE /delete ───────────────────────────────────────────────
+router.delete('/delete', auth, async (req, res) => {
+  try {
+    const { filename } = req.query;
+    const galleryItem = await Gallery.findOne({ filename });
+    if (!galleryItem) return res.status(404).json({ success: false, error: 'Not found' });
+
+    // Delete from Cloudinary (try both resource types)
+    try {
+      await cloudinary.uploader.destroy(galleryItem.filename, { resource_type: galleryItem.type === 'video' ? 'video' : 'image' });
+    } catch (e) { console.warn('Cloudinary delete warning:', e.message); }
+
+    await Gallery.deleteOne({ _id: galleryItem._id });
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Gallery delete error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });

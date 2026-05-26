@@ -6,85 +6,72 @@ const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cloudinary = require('../config/cloudinary');
 const multer = require('multer');
 
-// Configure storage for music files (audio)
+// Music storage — Cloudinary uses resource_type 'video' for audio files
 const musicStorage = new CloudinaryStorage({
   cloudinary,
-  params: {
+  params: async (req, file) => ({
     folder: 'rafios-music',
-    allowed_formats: ['mp3', 'wav', 'ogg', 'm4a', 'aac']
-  }
+    resource_type: 'video', // Cloudinary handles audio under 'video' resource type
+    allowed_formats: ['mp3', 'wav', 'ogg', 'm4a', 'aac', 'flac'],
+    public_id: `music_${Date.now()}_${Math.floor(Math.random() * 9999)}`,
+  }),
 });
 
-const uploadMusic = multer({ storage: musicStorage });
+const uploadMusic = multer({
+  storage: musicStorage,
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100 MB
+});
 
-// Get all music files
+// ── GET /list — public ───────────────────────────────────────────
 router.get('/list', async (req, res) => {
   try {
     const music = await Music.find().sort({ uploadedAt: -1 });
-    // Return just the paths for frontend consumption
-    const musicPaths = music.map(m => m.path);
-    res.json(musicPaths);
+    res.json(music.map(m => m.path));
   } catch (error) {
-    console.error('Error fetching music:', error);
+    console.error('Music list error:', error);
     res.status(500).json({ error: 'Failed to fetch music' });
   }
 });
 
-// Upload music file
-router.post('/upload', auth, uploadMusic.single('file'), async (req, res) => {
+// ── POST /upload — file upload via Cloudinary ────────────────────
+router.post('/upload', auth, (req, res, next) => {
+  uploadMusic.single('file')(req, res, (err) => {
+    if (err) {
+      console.error('Multer/Cloudinary music upload error:', err);
+      return res.status(500).json({ success: false, error: err.message || 'Upload failed' });
+    }
+    next();
+  });
+}, async (req, res) => {
   try {
-    const { title } = req.body;
+    if (!req.file) return res.status(400).json({ success: false, error: 'No file received' });
+
+    const path = req.file.path || req.file.secure_url;
+    const filename = req.file.filename || req.file.public_id;
+    const title = req.body.title || req.file.originalname || filename;
+
     const music = new Music({
-      title: title || req.file.originalname,
-      filename: req.file.filename,
-      path: req.file.path,
-      size: req.file.size
+      title,
+      filename,
+      path,
+      size: req.file.size || 0,
     });
-    
     await music.save();
+
     res.json({ success: true, music });
   } catch (error) {
-    console.error('Error uploading music:', error);
-    res.status(500).json({ success: false, error: 'Failed to upload music' });
+    console.error('Music save error:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
-// Delete music file
-router.delete('/delete', auth, async (req, res) => {
-  try {
-    const { filename } = req.query;
-    const music = await Music.findOne({ filename });
-    
-    if (!music) {
-      return res.status(404).json({ success: false, error: 'Music not found' });
-    }
-    
-    // Delete from Cloudinary
-    if (music.filename) {
-      try {
-        await cloudinary.uploader.destroy(music.filename);
-      } catch (cloudinaryError) {
-        console.warn('Cloudinary delete failed:', cloudinaryError);
-      }
-    }
-    
-    // Delete from database
-    await Music.deleteOne({ _id: music._id });
-    
-    res.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting music:', error);
-    res.status(500).json({ success: false, error: 'Failed to delete music' });
-  }
-});
-
-// Add music by URL (no file upload)
+// ── POST /add-url — add by URL ───────────────────────────────────
 router.post('/add-url', auth, async (req, res) => {
   try {
     const { url, title } = req.body;
     if (!url) return res.status(400).json({ success: false, error: 'URL is required' });
     const music = new Music({
-      title: title || url.split('/').pop(),
+      title: title || url.split('/').pop().replace(/\.[^.]+$/, ''),
       filename: url,
       path: url,
       size: 0,
@@ -92,6 +79,26 @@ router.post('/add-url', auth, async (req, res) => {
     await music.save();
     res.json({ success: true, music });
   } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ── DELETE /delete ───────────────────────────────────────────────
+router.delete('/delete', auth, async (req, res) => {
+  try {
+    const { filename } = req.query;
+    const music = await Music.findOne({ filename });
+    if (!music) return res.status(404).json({ success: false, error: 'Music not found' });
+
+    // Delete from Cloudinary — audio is stored under resource_type 'video'
+    try {
+      await cloudinary.uploader.destroy(music.filename, { resource_type: 'video' });
+    } catch (e) { console.warn('Cloudinary delete warning:', e.message); }
+
+    await Music.deleteOne({ _id: music._id });
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Music delete error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
