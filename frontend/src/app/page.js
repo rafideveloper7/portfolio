@@ -255,23 +255,40 @@ export default function HomePage() {
 
     if (id === 'gallery') return <Gallery />;
     if (id === 'music') return <MusicPlayer />;
-    if (id === 'cv') return (
-      <div className="flex flex-col h-full">
-        {cvs.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center text-gray-500 text-sm">No CV available.</div>
-        ) : (
-          <div className="p-5 space-y-4 overflow-auto">
-            <div className="flex justify-center">
-              <iframe src={cvs[0].path} className="w-full h-[500px] border border-gray-700 rounded-lg" title="CV Preview" />
-            </div>
-            <a href={cvs[0].path} download
-              className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl font-semibold text-white text-sm hover:opacity-90 transition">
-              <FiDownload size={16} /> Download CV
-            </a>
-          </div>
-        )}
-      </div>
-    );
+     if (id === 'cv') return (
+       <div className="flex flex-col h-full">
+         {cvs.length === 0 ? (
+           <div className="flex-1 flex items-center justify-center text-gray-500 text-sm">No CV available.</div>
+         ) : (
+           <div className="p-5 space-y-4 overflow-auto">
+             <div className="flex justify-center">
+               {/* Try to display PDF in iframe, fallback to link if blocked */}
+               <div className="w-full h-[500px] border border-gray-700 rounded-lg flex items-center justify-center">
+                 {cvs[0].path ? (
+                   <>
+                     <iframe src={cvs[0].path} className="w-full h-full border-none" title="CV Preview" />
+                     {/* Fallback link if iframe doesn't work */}
+                     <div className="text-white text-center absolute bottom-4 left-0 right-0">
+                       <a href={cvs[0].path} target="_blank" rel="noreferrer" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                         View CV in New Tab
+                       </a>
+                     </div>
+                   </>
+                 ) : (
+                   <div className="text-gray-500">CV URL not available</div>
+                 )}
+               </div>
+             </div>
+             <div className="mt-4">
+               <a href={cvs[0].path} download
+                 className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl font-semibold text-white text-sm hover:opacity-90 transition">
+                 <FiDownload size={16} /> Download CV
+               </a>
+             </div>
+           </div>
+         )}
+       </div>
+     );
   };
 
   const openApp = (app) => {

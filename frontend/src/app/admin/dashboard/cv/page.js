@@ -19,23 +19,24 @@ export default function CVAdminPage() {
 
   const token = () => localStorage.getItem('adminToken');
 
-  const load = async () => {
-    try {
-      const full = await axios.get(`${API}/api/cv/items`, {
-        headers: { Authorization: `Bearer ${token()}` },
-      }).catch(() => null);
-      if (full?.data) {
-        setItems(full.data);
-      } else {
-        const res = await axios.get(`${API}/api/cv/list`);
-        setItems((res.data || []).map(p => ({ path: p, filename: p, originalName: p })));
-      }
-    } catch {
-      toast.error('Failed to load CVs');
-    } finally {
-      setLoading(false);
-    }
-  };
+   const load = async () => {
+     try {
+       const full = await axios.get(`${API}/api/cv/items`, {
+         headers: { Authorization: `Bearer ${token()}` },
+       }).catch(() => null);
+       if (full?.data) {
+         setItems(full.data);
+       } else {
+         const res = await axios.get(`${API}/api/cv/list`);
+         // The /api/cv/list endpoint returns objects with path, filename, originalName
+         setItems(res.data || []);
+       }
+     } catch {
+       toast.error('Failed to load CVs');
+     } finally {
+       setLoading(false);
+     }
+   };
 
   useEffect(() => { load(); }, []);
 
@@ -109,20 +110,25 @@ export default function CVAdminPage() {
     }
   };
 
-  const handleAddUrl = async () => {
-    if (!urlInput.trim()) return;
-    try {
-      await axios.post(`${API}/api/cv/add-url`,
-        { url: urlInput.trim(), originalName: 'CV.pdf' },
-        { headers: { Authorization: `Bearer ${token()}` } }
-      );
-      toast.success('Added');
-      setUrlInput('');
-      load();
-    } catch {
-      toast.error('Failed to add URL');
-    }
-  };
+   const handleAddUrl = async () => {
+     if (!urlInput.trim()) return;
+     try {
+       await axios.post(`${API}/api/cv/add-url`,
+         { 
+           url: urlInput.trim(), 
+           originalName: 'CV.pdf',
+           filename: `cv_${Date.now()}_${Math.floor(Math.random() * 9999)}` // Generate a filename similar to file upload
+         },
+         { headers: { Authorization: `Bearer ${token()}` } }
+       );
+       toast.success('Added');
+       setUrlInput('');
+       load();
+     } catch (err) {
+       console.error('Add URL error:', err);
+       toast.error('Failed to add URL: ' + (err.response?.data?.error || err.message));
+     }
+   };
 
   const handleDelete = async (filename) => {
     if (!confirm('Delete this CV?')) return;
