@@ -13,17 +13,23 @@ const uploadRoutes = require('./routes/upload.routes');
 
 const app = express();
 
-// Allow multiple origins: local dev + production frontend
+// Allow multiple origins: local dev + any vercel.app + explicit FRONTEND_URL
 const allowedOrigins = [
   'http://localhost:3000',
+  'http://localhost:3001',
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, curl, Postman)
+    // Allow requests with no origin (curl, Postman, mobile apps)
     if (!origin) return callback(null, true);
+    // Allow any vercel.app subdomain (covers preview deployments too)
+    if (origin.endsWith('.vercel.app')) return callback(null, true);
+    // Allow explicitly listed origins
     if (allowedOrigins.includes(origin)) return callback(null, true);
+    // Allow localhost on any port
+    if (/^http:\/\/localhost:\d+$/.test(origin)) return callback(null, true);
     callback(new Error(`CORS blocked: ${origin}`));
   },
   credentials: true,
