@@ -109,10 +109,12 @@ body {
   * { scrollbar-width: none; }
 }
 
-/* Extra small screens (smartwatch ~180px+) */
-@media (max-width: 240px) {
-  body { font-size: 10px; }
-}
+/* Safelist gradient classes used dynamically */
+.from-indigo-950 { --tw-gradient-from: #1e1b4b; }
+.via-purple-900\/40 { --tw-gradient-via: rgb(88 28 135 / 0.4); }
+.from-gray-950 { --tw-gradient-from: #030712; }
+.via-cyan-900\/25 { --tw-gradient-via: rgb(22 78 99 / 0.25); }
+.via-orange-900\/20 { --tw-gradient-via: rgb(124 45 18 / 0.2); }
 
 
 /* Custom Scrollbar */
@@ -238,4 +240,9 @@ body {
 
 .submenu-item:hover {
   background: rgba(79, 156, 249, 0.2);
+}
+
+/* Extra small screens (smartwatch ~180px+) */
+@media (max-width: 240px) {
+  body { font-size: 10px; }
 }

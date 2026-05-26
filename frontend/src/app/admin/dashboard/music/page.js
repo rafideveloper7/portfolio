@@ -9,11 +9,71 @@ const API = process.env.NEXT_PUBLIC_API_URL;
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
+// Formats Cloudinary accepts natively under resource_type=video
+const CLOUDINARY_NATIVE = ['mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac', 'mp4', 'webm'];
+
+// Convert any audio file to WAV using Web Audio API (runs in browser)
+async function convertToWav(file, onProgress) {
+  onProgress(5);
+  const arrayBuffer = await file.arrayBuffer();
+  onProgress(20);
+
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const decoded = await audioCtx.decodeAudioData(arrayBuffer);
+  onProgress(50);
+
+  const numChannels = decoded.numberOfChannels;
+  const sampleRate = decoded.sampleRate;
+  const length = decoded.length;
+
+  // Interleave channels
+  const interleaved = new Float32Array(length * numChannels);
+  for (let ch = 0; ch < numChannels; ch++) {
+    const channelData = decoded.getChannelData(ch);
+    for (let i = 0; i < length; i++) {
+      interleaved[i * numChannels + ch] = channelData[i];
+    }
+  }
+  onProgress(65);
+
+  // Convert float32 to int16
+  const pcm = new Int16Array(interleaved.length);
+  for (let i = 0; i < interleaved.length; i++) {
+    const s = Math.max(-1, Math.min(1, interleaved[i]));
+    pcm[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+  }
+  onProgress(75);
+
+  // Build WAV header
+  const wavBuffer = new ArrayBuffer(44 + pcm.byteLength);
+  const view = new DataView(wavBuffer);
+  const writeStr = (offset, str) => { for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i)); };
+  writeStr(0, 'RIFF');
+  view.setUint32(4, 36 + pcm.byteLength, true);
+  writeStr(8, 'WAVE');
+  writeStr(12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);                          // PCM
+  view.setUint16(22, numChannels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * numChannels * 2, true); // byte rate
+  view.setUint16(32, numChannels * 2, true);             // block align
+  view.setUint16(34, 16, true);                          // bits per sample
+  writeStr(36, 'data');
+  view.setUint32(40, pcm.byteLength, true);
+  new Int16Array(wavBuffer, 44).set(pcm);
+  onProgress(85);
+
+  await audioCtx.close();
+  return new Blob([wavBuffer], { type: 'audio/wav' });
+}
+
 export default function MusicAdminPage() {
   const [songs, setSongs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [statusMsg, setStatusMsg] = useState('');
   const [urlInput, setUrlInput] = useState('');
   const [titleInput, setTitleInput] = useState('');
   const [tab, setTab] = useState('upload');
@@ -33,71 +93,84 @@ export default function MusicAdminPage() {
 
   useEffect(() => { load(); }, []);
 
-  // Upload directly to Cloudinary from browser, then save URL to backend
+  const uploadToCloudinary = (blob, filename) => {
+    return new Promise((resolve, reject) => {
+      const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`;
+      const formData = new FormData();
+      formData.append('file', blob, filename);
+      formData.append('upload_preset', UPLOAD_PRESET);
+      formData.append('folder', 'rafios-music');
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', uploadUrl);
+      xhr.upload.onprogress = (ev) => {
+        if (ev.lengthComputable) {
+          // Map upload progress to 85–100%
+          setProgress(85 + Math.round((ev.loaded / ev.total) * 15));
+        }
+      };
+      xhr.onload = () => {
+        if (xhr.status === 200) resolve(JSON.parse(xhr.responseText));
+        else reject(new Error(JSON.parse(xhr.responseText)?.error?.message || `HTTP ${xhr.status}`));
+      };
+      xhr.onerror = () => reject(new Error('Network error'));
+      xhr.send(formData);
+    });
+  };
+
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    e.target.value = '';
 
     if (!CLOUD_NAME || !UPLOAD_PRESET) {
-      toast.error('Cloudinary not configured. Check NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME and NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET in Vercel env vars.');
+      toast.error('Cloudinary env vars missing. Add NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME and NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET to Vercel.');
       return;
     }
 
     setUploading(true);
     setProgress(0);
 
-    // Cloudinary stores audio under resource_type 'video'
-    const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`;
-
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', UPLOAD_PRESET);
-    formData.append('folder', 'rafios-music');
-
     try {
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', uploadUrl);
+      const ext = file.name.split('.').pop().toLowerCase();
+      const title = file.name.replace(/\.[^.]+$/, '');
+      let uploadBlob;
+      let uploadName;
 
-      xhr.upload.onprogress = (ev) => {
-        if (ev.lengthComputable) setProgress(Math.round((ev.loaded / ev.total) * 100));
-      };
+      if (CLOUDINARY_NATIVE.includes(ext)) {
+        // Native format — upload directly
+        setStatusMsg('Uploading...');
+        setProgress(10);
+        uploadBlob = file;
+        uploadName = file.name;
+      } else {
+        // Unsupported format — convert to WAV first
+        setStatusMsg(`Converting ${ext.toUpperCase()} → WAV...`);
+        uploadBlob = await convertToWav(file, setProgress);
+        uploadName = title + '.wav';
+        setStatusMsg('Uploading WAV to Cloudinary...');
+      }
 
-      xhr.onload = async () => {
-        setUploading(false);
-        setProgress(0);
-        e.target.value = '';
+      setProgress(85);
+      setStatusMsg('Uploading to Cloudinary...');
+      const result = await uploadToCloudinary(uploadBlob, uploadName);
 
-        if (xhr.status === 200) {
-          const result = JSON.parse(xhr.responseText);
-          const secureUrl = result.secure_url;
-          const publicId = result.public_id;
-          const title = file.name.replace(/\.[^.]+$/, '');
+      setStatusMsg('Saving...');
+      await axios.post(`${API}/api/music/add-url`,
+        { url: result.secure_url, title, filename: result.public_id },
+        { headers: { Authorization: `Bearer ${token()}` } }
+      );
 
-          try {
-            await axios.post(`${API}/api/music/add-url`,
-              { url: secureUrl, title, filename: publicId },
-              { headers: { Authorization: `Bearer ${token()}` } }
-            );
-            toast.success('Uploaded successfully');
-            load();
-          } catch {
-            toast.error('Uploaded to Cloudinary but failed to save to database');
-          }
-        } else {
-          const err = JSON.parse(xhr.responseText);
-          toast.error('Cloudinary upload failed: ' + (err?.error?.message || xhr.status));
-        }
-      };
-
-      xhr.onerror = () => {
-        setUploading(false);
-        toast.error('Upload network error');
-      };
-
-      xhr.send(formData);
+      setProgress(100);
+      toast.success('Uploaded successfully');
+      load();
     } catch (err) {
-      setUploading(false);
+      console.error(err);
       toast.error('Upload failed: ' + err.message);
+    } finally {
+      setUploading(false);
+      setProgress(0);
+      setStatusMsg('');
     }
   };
 
@@ -132,8 +205,8 @@ export default function MusicAdminPage() {
 
   const songName = (url) => {
     try {
-      const name = decodeURIComponent(url.split('/').pop().split('?')[0]);
-      return name.replace(/^v\d+\//, '').replace(/\.[^.]+$/, '');
+      return decodeURIComponent(url.split('/').pop().split('?')[0])
+        .replace(/^v\d+\//, '').replace(/\.[^.]+$/, '');
     } catch { return url; }
   };
 
@@ -158,16 +231,27 @@ export default function MusicAdminPage() {
             <label className={`flex items-center gap-3 px-5 py-3 bg-gray-700 hover:bg-gray-600 border border-dashed border-gray-500 rounded-xl cursor-pointer transition w-fit ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
               <FiUpload className="text-blue-400" />
               <span className="text-sm text-gray-300">
-                {uploading ? `Uploading to Cloudinary... ${progress}%` : 'Choose audio file (mp3, wav, ogg, m4a)'}
+                {uploading ? statusMsg || `${progress}%` : 'Choose audio file (any format)'}
               </span>
-              <input type="file" accept="audio/*" className="hidden" onChange={handleFileUpload} disabled={uploading} />
+              <input type="file" accept="audio/*,.mp3,.wav,.ogg,.m4a,.aac,.flac,.wma,.opus"
+                className="hidden" onChange={handleFileUpload} disabled={uploading} />
             </label>
+
             {uploading && (
-              <div className="mt-3 w-64 bg-gray-700 rounded-full h-2">
-                <div className="bg-blue-500 h-2 rounded-full transition-all" style={{ width: `${progress}%` }} />
+              <div className="mt-3 w-72 space-y-1">
+                <div className="flex justify-between text-xs text-gray-400">
+                  <span>{statusMsg}</span>
+                  <span>{progress}%</span>
+                </div>
+                <div className="bg-gray-700 rounded-full h-2">
+                  <div className="bg-blue-500 h-2 rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+                </div>
               </div>
             )}
-            <p className="text-xs text-gray-500 mt-2">Files upload directly to Cloudinary — works in production.</p>
+
+            <p className="text-xs text-gray-500 mt-2">
+              Supports mp3, wav, ogg, m4a, aac, flac. Other formats auto-convert to WAV in browser.
+            </p>
           </div>
         )}
 

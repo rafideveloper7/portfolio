@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { FiHome, FiUser, FiFolder, FiCode, FiMessageSquare, FiLogOut, FiImage, FiMusic, FiMonitor, FiMenu, FiX } from 'react-icons/fi';
+import { FiHome, FiUser, FiFolder, FiCode, FiMessageSquare, FiLogOut, FiImage, FiMusic, FiMonitor, FiMenu, FiX, FiFileText } from 'react-icons/fi';
 
 const navItems = [
   { href: '/admin/dashboard',           label: 'Dashboard', icon: FiHome },
@@ -13,6 +13,7 @@ const navItems = [
   { href: '/admin/dashboard/gallery',   label: 'Gallery',   icon: FiImage },
   { href: '/admin/dashboard/music',     label: 'Music',     icon: FiMusic },
   { href: '/admin/dashboard/wallpaper', label: 'Wallpaper', icon: FiMonitor },
+  { href: '/admin/dashboard/cv',        label: 'CV',        icon: FiFileText },
   { href: '/admin/dashboard/messages',  label: 'Messages',  icon: FiMessageSquare },
 ];
 

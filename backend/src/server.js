@@ -47,6 +47,7 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/music', require('./routes/music.routes'));
 app.use('/api/gallery', require('./routes/gallery.routes'));
+app.use('/api/cv', require('./routes/cv.routes'));
 app.use('/api/settings', require('./routes/settings.routes'));
 
 app.get('/api/health', (req, res) => res.json({ status: 'OK', env: process.env.NODE_ENV }));
