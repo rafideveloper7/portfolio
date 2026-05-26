@@ -11,8 +11,7 @@ const musicStorage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => ({
     folder: 'rafios-music',
-    resource_type: 'video', // Cloudinary handles audio under 'video' resource type
-    allowed_formats: ['mp3', 'wav', 'ogg', 'm4a', 'aac', 'flac'],
+    resource_type: 'video', // Cloudinary stores all audio under 'video'
     public_id: `music_${Date.now()}_${Math.floor(Math.random() * 9999)}`,
   }),
 });

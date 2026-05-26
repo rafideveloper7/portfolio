@@ -10,12 +10,15 @@ const multer = require('multer');
 const galleryStorage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
-    const isVideo = file.mimetype.startsWith('video/');
+    // mimetype may be undefined at params stage in some multer versions
+    // detect from originalname extension as fallback
+    const mime = file.mimetype || '';
+    const name = (file.originalname || '').toLowerCase();
+    const isVideo = mime.startsWith('video/') ||
+      /\.(mp4|webm|mov|avi|mkv|ogg)$/i.test(name);
     return {
       folder: 'rafios-gallery',
       resource_type: isVideo ? 'video' : 'image',
-      allowed_formats: ['jpg', 'png', 'jpeg', 'gif', 'webp', 'mp4', 'webm', 'mov'],
-      // Use original filename (sanitised)
       public_id: `gallery_${Date.now()}_${Math.floor(Math.random() * 9999)}`,
     };
   },
@@ -60,11 +63,11 @@ router.post('/upload', auth, (req, res, next) => {
   try {
     if (!req.file) return res.status(400).json({ success: false, error: 'No file received' });
 
-    const isVideo = req.file.mimetype?.startsWith('video/') ||
-                    req.file.resource_type === 'video';
+    const mime = req.file.mimetype || '';
+    const name = (req.file.originalname || '').toLowerCase();
+    const isVideo = mime.startsWith('video/') || /\.(mp4|webm|mov|avi|mkv|ogg)$/i.test(name);
     const type = isVideo ? 'video' : 'image';
 
-    // Cloudinary returns secure_url and public_id on req.file
     const path = req.file.path || req.file.secure_url;
     const filename = req.file.filename || req.file.public_id;
 
