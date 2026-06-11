@@ -67,7 +67,6 @@ export default function SkillsPage() {
   if (loading) return <div className="p-6 text-gray-400">Loading...</div>;
 
   return (
-  return (
     <div className="text-white">
       <div className="flex items-center justify-between mb-8">
         <div>
