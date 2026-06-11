@@ -123,11 +123,6 @@ export default function MusicAdminPage() {
     if (!file) return;
     e.target.value = '';
 
-    if (!CLOUD_NAME || !UPLOAD_PRESET) {
-      toast.error('Cloudinary env vars missing. Add NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME and NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET to Vercel.');
-      return;
-    }
-
     setUploading(true);
     setProgress(0);
 
@@ -138,35 +133,41 @@ export default function MusicAdminPage() {
       let uploadName;
 
       if (CLOUDINARY_NATIVE.includes(ext)) {
-        // Native format — upload directly
-        setStatusMsg('Uploading...');
+        setStatusMsg('Uploading to server...');
         setProgress(10);
         uploadBlob = file;
         uploadName = file.name;
       } else {
-        // Unsupported format — convert to WAV first
         setStatusMsg(`Converting ${ext.toUpperCase()} → WAV...`);
         uploadBlob = await convertToWav(file, setProgress);
         uploadName = title + '.wav';
-        setStatusMsg('Uploading WAV to Cloudinary...');
+        setStatusMsg('Uploading WAV to server...');
       }
 
-      setProgress(85);
-      setStatusMsg('Uploading to Cloudinary...');
-      const result = await uploadToCloudinary(uploadBlob, uploadName);
+      const formData = new FormData();
+      formData.append('file', uploadBlob, uploadName);
+      formData.append('title', title);
 
-      setStatusMsg('Saving...');
-      await axios.post(`${API}/api/music/add-url`,
-        { url: result.secure_url, title, filename: result.public_id },
-        { headers: { Authorization: `Bearer ${token()}` } }
-      );
+      const res = await axios.post(`${API}/api/music/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token()}`
+        },
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          setProgress(10 + Math.round(percentCompleted * 0.9));
+        }
+      });
 
-      setProgress(100);
-      toast.success('Uploaded successfully');
-      load();
+      if (res.data.success) {
+        toast.success('Uploaded successfully');
+        load();
+      } else {
+        toast.error(res.data.error || 'Upload failed');
+      }
     } catch (err) {
       console.error(err);
-      toast.error('Upload failed: ' + err.message);
+      toast.error('Upload failed: ' + (err.response?.data?.error || err.message));
     } finally {
       setUploading(false);
       setProgress(0);

@@ -29,56 +29,68 @@ export default function DashboardLayout({ children }) {
 
   const NavLinks = ({ onNavigate }) => (
     <>
-      <nav className="flex-1 p-2 space-y-0.5">
+      <nav className="flex-1 p-3 space-y-1">
         {navItems.map(({ href, label, icon: Icon }) => {
           const active = pathname === href;
           return (
             <Link key={href} href={href} onClick={onNavigate}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
-                active ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+              className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 border ${
+                active 
+                  ? 'bg-blue-600/20 text-blue-400 border-blue-500/30 shadow-lg shadow-blue-500/5' 
+                  : 'text-gray-400 border-transparent hover:bg-white/5 hover:text-white'
               }`}>
-              <Icon size={15} />
+              <Icon size={16} className={active ? 'text-blue-400' : 'text-gray-400'} />
               {label}
             </Link>
           );
         })}
       </nav>
-      <div className="p-2 border-t border-gray-700">
+      <div className="p-3 border-t border-white/10">
         <button onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition w-full">
-          <FiLogOut size={15} /> Logout
+          className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300 border border-transparent hover:border-red-500/20 transition-all duration-200 w-full">
+          <FiLogOut size={16} /> Logout
         </button>
       </div>
     </>
   );
 
   return (
-    <div className="min-h-screen bg-gray-900 flex">
+    <div className="min-h-screen bg-gradient-to-br from-[#0c0d12] via-[#121420] to-[#0a0a0f] flex relative overflow-hidden">
+      {/* Decorative background glows */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-500/5 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-purple-500/5 blur-[120px] pointer-events-none" />
+
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-52 bg-gray-800 border-r border-gray-700 flex-col shrink-0">
-        <div className="p-4 border-b border-gray-700">
-          <h1 className="text-white font-bold">RafiOS Admin</h1>
-          <p className="text-gray-400 text-xs mt-0.5">Dashboard</p>
+      <aside className="hidden md:flex w-56 bg-black/30 border-r border-white/10 flex-col shrink-0 backdrop-blur-xl z-20">
+        <div className="p-5 border-b border-white/10">
+          <h1 className="text-white font-bold tracking-tight text-lg bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">RafiOS</h1>
+          <p className="text-blue-400 text-[10px] font-semibold uppercase tracking-wider mt-0.5 font-mono">Control Panel</p>
         </div>
         <NavLinks onNavigate={() => {}} />
       </aside>
 
       {/* Mobile header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-12 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4 z-50">
-        <h1 className="text-white font-bold text-sm">RafiOS Admin</h1>
-        <button onClick={() => setSidebarOpen(true)} className="text-gray-300 hover:text-white p-1">
-          <FiMenu size={20} />
+      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-black/40 border-b border-white/10 backdrop-blur-xl flex items-center justify-between px-4 z-40">
+        <div>
+          <h1 className="text-white font-bold text-sm">RafiOS</h1>
+          <p className="text-blue-400 text-[8px] font-semibold uppercase tracking-wider font-mono">Control Panel</p>
+        </div>
+        <button onClick={() => setSidebarOpen(true)} className="text-gray-300 hover:text-white p-1.5 bg-white/5 border border-white/10 rounded-lg">
+          <FiMenu size={18} />
         </button>
       </div>
 
       {/* Mobile drawer */}
       {sidebarOpen && (
         <div className="md:hidden fixed inset-0 z-50 flex">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setSidebarOpen(false)} />
-          <div className="relative w-56 bg-gray-800 flex flex-col h-full shadow-2xl">
-            <div className="p-4 border-b border-gray-700 flex items-center justify-between">
-              <h1 className="text-white font-bold">RafiOS Admin</h1>
-              <button onClick={() => setSidebarOpen(false)} className="text-gray-400 hover:text-white"><FiX size={18} /></button>
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
+          <div className="relative w-60 bg-gray-950/95 border-r border-white/10 flex flex-col h-full shadow-2xl backdrop-blur-xl">
+            <div className="p-4 border-b border-white/10 flex items-center justify-between">
+              <div>
+                <h1 className="text-white font-bold">RafiOS</h1>
+                <p className="text-blue-400 text-[8px] font-semibold uppercase tracking-wider font-mono">Control Panel</p>
+              </div>
+              <button onClick={() => setSidebarOpen(false)} className="text-gray-400 hover:text-white p-1 bg-white/5 border border-white/10 rounded-lg"><FiX size={16} /></button>
             </div>
             <NavLinks onNavigate={() => setSidebarOpen(false)} />
           </div>
@@ -86,8 +98,10 @@ export default function DashboardLayout({ children }) {
       )}
 
       {/* Main content */}
-      <main className="flex-1 overflow-auto md:pt-0 pt-12 min-w-0">
-        {children}
+      <main className="flex-1 overflow-auto md:pt-0 pt-14 min-w-0 z-10">
+        <div className="p-4 sm:p-8 max-w-6xl mx-auto">
+          {children}
+        </div>
       </main>
     </div>
   );

@@ -28,7 +28,12 @@ async function sendDirectEmail(to, subject, html) {
 
 async function sendMail(mailOptions) {
   try {
-    if (transporter) await transporter.sendMail(mailOptions);
+    if (transporter) {
+      await transporter.sendMail(mailOptions);
+    } else {
+      console.log('No SMTP configured, using FormSubmit fallback');
+      await sendDirectEmail(mailOptions.to, mailOptions.subject, mailOptions.html);
+    }
   } catch (e) {
     console.warn('SMTP failed, trying FormSubmit:', e.message);
     await sendDirectEmail(mailOptions.to, mailOptions.subject, mailOptions.html);

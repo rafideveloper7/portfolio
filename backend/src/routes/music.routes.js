@@ -86,7 +86,12 @@ router.post('/add-url', auth, async (req, res) => {
 router.delete('/delete', auth, async (req, res) => {
   try {
     const { filename } = req.query;
-    const music = await Music.findOne({ filename });
+    const music = await Music.findOne({
+      $or: [
+        { filename },
+        { path: filename }
+      ]
+    });
     if (!music) return res.status(404).json({ success: false, error: 'Music not found' });
 
     // Delete from Cloudinary — audio is stored under resource_type 'video'

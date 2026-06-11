@@ -43,6 +43,36 @@ router.get('/items', auth, async (req, res) => {
   }
 });
 
+router.post('/upload', auth, (req, res, next) => {
+  uploadCV.single('file')(req, res, (err) => {
+    if (err) {
+      console.error('Multer/Cloudinary CV upload error:', err);
+      return res.status(500).json({ success: false, error: err.message || 'Upload failed' });
+    }
+    next();
+  });
+}, async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ success: false, error: 'No file received' });
+    const path = req.file.path || req.file.secure_url;
+    const filename = req.file.filename || req.file.public_id;
+    const originalName = req.file.originalname || 'CV.pdf';
+
+    const cv = new CV({
+      filename,
+      path,
+      originalName,
+      size: req.file.size || 0,
+      uploadedBy: req.adminId, // or req.user.id depending on auth middleware
+    });
+    await cv.save();
+    res.json({ success: true, cv });
+  } catch (error) {
+    console.error('CV save error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 router.post('/add-url', auth, async (req, res) => {
   try {
     const { url, filename, originalName } = req.body;

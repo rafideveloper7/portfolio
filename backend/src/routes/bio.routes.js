@@ -24,11 +24,27 @@ router.put('/', auth, async (req, res) => {
   res.json(bio);
 });
 
-router.post('/upload-image', auth, upload.single('image'), async (req, res) => {
+router.post('/upload-image', auth, (req, res, next) => {
+  if (req.headers['content-type']?.includes('application/json')) {
+    return next();
+  }
+  upload.single('image')(req, res, (err) => {
+    if (err) return res.status(500).json({ success: false, error: err.message });
+    next();
+  });
+}, async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ success: false, error: 'No image file received' });
-    const path = req.file.path || req.file.secure_url;
-    const publicId = req.file.filename;
+    let path, publicId;
+    if (req.file) {
+      path = req.file.path || req.file.secure_url;
+      publicId = req.file.filename || req.file.public_id;
+    } else {
+      path = req.body.image || req.body.url;
+      publicId = req.body.filename || req.body.publicId;
+    }
+
+    if (!path) return res.status(400).json({ success: false, error: 'No image data received' });
+
     const bio = await Bio.findOneAndUpdate({}, { image: path, imagePublicId: publicId }, { new: true, upsert: true });
     res.json({ success: true, bio });
   } catch (error) {

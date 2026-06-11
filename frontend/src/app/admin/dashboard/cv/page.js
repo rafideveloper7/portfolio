@@ -44,11 +44,6 @@ export default function CVAdminPage() {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (!CLOUD_NAME || !UPLOAD_PRESET) {
-      toast.error('Cloudinary not configured. Check NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME and NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET in Vercel env vars.');
-      return;
-    }
-
     if (file.type !== 'application/pdf') {
       toast.error('Only PDF files are allowed');
       return;
@@ -57,56 +52,34 @@ export default function CVAdminPage() {
     setUploading(true);
     setProgress(0);
 
-    const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/raw/upload`;
-
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('upload_preset', UPLOAD_PRESET);
-    formData.append('folder', 'rafios-cv');
 
     try {
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', uploadUrl);
-
-      xhr.upload.onprogress = (ev) => {
-        if (ev.lengthComputable) setProgress(Math.round((ev.loaded / ev.total) * 100));
-      };
-
-      xhr.onload = async () => {
-        setUploading(false);
-        setProgress(0);
-        e.target.value = '';
-
-        if (xhr.status === 200) {
-          const result = JSON.parse(xhr.responseText);
-          const secureUrl = result.secure_url;
-          const publicId = result.public_id;
-
-          try {
-            await axios.post(`${API}/api/cv/add-url`,
-              { url: secureUrl, filename: publicId, originalName: file.name },
-              { headers: { Authorization: `Bearer ${token()}` } }
-            );
-            toast.success('CV uploaded successfully');
-            load();
-          } catch {
-            toast.error('Uploaded to Cloudinary but failed to save to database');
-          }
-        } else {
-          const err = JSON.parse(xhr.responseText);
-          toast.error('Cloudinary upload failed: ' + (err?.error?.message || xhr.status));
+      const res = await axios.post(`${API}/api/cv/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token()}`
+        },
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          setProgress(percentCompleted);
         }
-      };
+      });
 
-      xhr.onerror = () => {
-        setUploading(false);
-        toast.error('Upload network error');
-      };
-
-      xhr.send(formData);
+      if (res.data.success) {
+        toast.success('CV uploaded successfully');
+        load();
+      } else {
+        toast.error(res.data.error || 'Upload failed');
+      }
     } catch (err) {
+      console.error('Upload error:', err);
+      toast.error(err.response?.data?.error || 'Upload failed');
+    } finally {
       setUploading(false);
-      toast.error('Upload failed: ' + err.message);
+      setProgress(0);
+      e.target.value = '';
     }
   };
 

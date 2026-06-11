@@ -34,52 +34,50 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6 sm:p-10">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex items-end justify-between mb-10">
-          <div>
-            <p className="text-blue-400 text-xs font-bold uppercase tracking-widest mb-1">Admin Dashboard</p>
-            <h1 className="text-3xl font-bold">Welcome back <span className="text-blue-400">Rafi</span></h1>
-            <p className="text-gray-400 text-sm mt-1">Manage your personal brand identity.</p>
-          </div>
-          <div className="hidden sm:flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 rounded-2xl px-4 py-2">
-            <FiActivity className="text-blue-400" />
-            <span className="text-blue-400 text-xs font-semibold">System Active</span>
-          </div>
+    <div className="text-white">
+      {/* Header */}
+      <div className="flex items-end justify-between mb-8">
+        <div>
+          <p className="text-blue-400 text-xs font-bold uppercase tracking-widest mb-1">Admin Dashboard</p>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-gray-100 to-gray-400 bg-clip-text text-transparent">Welcome back, <span className="text-blue-400">Rafi</span></h1>
+          <p className="text-gray-400 text-sm mt-1">Manage your personal brand identity.</p>
         </div>
-
-        {/* Stats row */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-          {[
-            { label: 'Messages', value: messageCount, color: 'text-blue-400' },
-            { label: 'Projects', value: '—', color: 'text-green-400' },
-            { label: 'Songs', value: '—', color: 'text-purple-400' },
-            { label: 'Gallery', value: '—', color: 'text-pink-400' },
-          ].map((stat, i) => (
-            <div key={i} className="bg-gray-800/50 border border-gray-700/50 rounded-2xl p-4">
-              <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
-              <p className="text-xs text-gray-400 uppercase tracking-wider mt-1">{stat.label}</p>
-            </div>
-          ))}
+        <div className="hidden sm:flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 rounded-2xl px-4 py-2">
+          <FiActivity className="text-blue-400 animate-pulse" />
+          <span className="text-blue-400 text-xs font-semibold">System Active</span>
         </div>
+      </div>
 
-        {/* Management grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {cards.map(({ label, icon: Icon, desc, href, color }) => (
-            <Link key={label} href={href}
-              className="group relative bg-gray-800/50 border border-gray-700/50 hover:border-gray-500 rounded-2xl p-5 transition-all duration-200 hover:shadow-xl hover:shadow-black/30 overflow-hidden">
-              <div className={`absolute inset-0 bg-gradient-to-br ${color} opacity-0 group-hover:opacity-5 transition-opacity`} />
-              <div className="relative z-10">
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center mb-3 shadow-lg group-hover:scale-110 transition-transform`}>
-                  <Icon className="text-white" size={18} />
-                </div>
-                <p className="text-white font-semibold text-sm">{label}</p>
-                <p className="text-gray-500 text-xs mt-0.5">{desc}</p>
+      {/* Stats row */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+        {[
+          { label: 'Messages', value: messageCount, color: 'text-blue-400' },
+          { label: 'Projects', value: '—', color: 'text-green-400' },
+          { label: 'Songs', value: '—', color: 'text-purple-400' },
+          { label: 'Gallery', value: '—', color: 'text-pink-400' },
+        ].map((stat, i) => (
+          <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xl hover:border-white/20 transition-all duration-200">
+            <p className={`text-3xl font-extrabold font-mono ${stat.color}`}>{stat.value}</p>
+            <p className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold mt-1.5">{stat.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Management grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {cards.map(({ label, icon: Icon, desc, href, color }) => (
+          <Link key={label} href={href}
+            className="group relative bg-white/5 border border-white/10 hover:border-blue-500/50 rounded-2xl p-5 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/5 backdrop-blur-xl hover:-translate-y-1 overflow-hidden">
+            <div className={`absolute inset-0 bg-gradient-to-br ${color} opacity-0 group-hover:opacity-[0.03] transition-opacity`} />
+            <div className="relative z-10">
+              <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center mb-4 shadow-lg shadow-black/30 group-hover:scale-110 transition-transform`}>
+                <Icon className="text-white" size={20} />
               </div>
-            </Link>
-          ))}
-        </div>
+              <p className="text-white font-bold text-sm tracking-tight">{label}</p>
+              <p className="text-gray-400 text-xs mt-1 leading-normal">{desc}</p>
+            </div>
+          </Link>
+        ))}
       </div>
     </div>
   );

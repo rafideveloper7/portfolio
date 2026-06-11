@@ -60,6 +60,7 @@ export default function HomePage() {
   const [isMobile, setIsMobile] = useState(false);
   const [activeApp, setActiveApp] = useState(null);
   const [statusMsg, setStatusMsg] = useState(statusMessages[0]);
+  const [activeCvIdx, setActiveCvIdx] = useState(0);
   const [stats, setStats] = useState({ projects: 0, hours: 2400, clients: 12, experience: 4 });
   const dragRef = useRef(null);
 
@@ -400,47 +401,53 @@ export default function HomePage() {
     if (id === 'gallery') return <Gallery />;
     if (id === 'music') return <MusicPlayer />;
 
-    if (id === 'cv') return (
-      <div className="flex flex-col h-full">
-        {cvs.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center text-gray-500 text-sm">No CV available.</div>
-        ) : (
-          <div className="p-5 space-y-4 overflow-auto">
-            <div className="text-center mb-2">
-              <p className="text-white font-semibold text-sm">📄 My CV ({cvs.length})</p>
-            </div>
-            <div className="flex justify-center">
-              <div className="w-full h-[500px] border border-gray-700 rounded-lg flex items-center justify-center bg-black/40">
-                {cvs[0]?.path ? (
-                  <>
-                    <iframe src={cvs[0].path} className="w-full h-full border-none" title="CV Preview" />
-                    <div className="text-white text-center absolute bottom-4 left-0 right-0">
-                      <a href={cvs[0].path} target="_blank" rel="noreferrer" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">View in New Tab</a>
+    if (id === 'cv') {
+      const activeCv = cvs[activeCvIdx] || cvs[0];
+      return (
+        <div className="flex flex-col h-full">
+          {cvs.length === 0 ? (
+            <div className="flex-1 flex items-center justify-center text-gray-500 text-sm">No CV available.</div>
+          ) : (
+            <div className="p-5 space-y-4 overflow-auto">
+              <div className="text-center mb-2">
+                <p className="text-white font-semibold text-sm">📄 My CV ({cvs.length})</p>
+              </div>
+              <div className="flex justify-center">
+                <div className="relative w-full h-[500px] border border-gray-700 rounded-lg flex items-center justify-center bg-black/40 overflow-hidden">
+                  {activeCv?.path ? (
+                    <>
+                      <iframe src={activeCv.path} className="w-full h-full border-none" title="CV Preview" />
+                      <div className="text-white text-center absolute bottom-4 left-0 right-0">
+                        <a href={activeCv.path} target="_blank" rel="noreferrer" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-xs font-semibold shadow-lg">View in New Tab</a>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-gray-500">CV not available</div>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-2">
+                {cvs.map((cv, i) => (
+                  <button key={i} onClick={() => setActiveCvIdx(i)}
+                    className={`w-full flex items-center justify-between border rounded-2xl p-3 text-left transition ${activeCvIdx === i ? 'bg-blue-600/10 border-blue-500/50' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}>
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${activeCvIdx === i ? 'bg-blue-500/20 text-blue-400' : 'bg-red-500/20 text-red-400'}`}>📄</div>
+                      <div>
+                        <p className="text-white text-sm font-medium truncate max-w-[200px]">{cv.originalName || fmt(cv.path)}</p>
+                        <p className="text-gray-500 text-xs">PDF</p>
+                      </div>
                     </div>
-                  </>
-                ) : (
-                  <div className="text-gray-500">CV not available</div>
-                )}
+                    <span className={`text-xs px-3 py-1.5 rounded-full transition font-semibold ${activeCvIdx === i ? 'bg-blue-500 text-white' : 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30'}`}>
+                      {activeCvIdx === i ? 'Viewing' : 'Select'}
+                    </span>
+                  </button>
+                ))}
               </div>
             </div>
-            <div className="space-y-2">
-              {cvs.map((cv, i) => (
-                <div key={i} className="flex items-center justify-between bg-white/5 border border-white/10 rounded-2xl p-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center text-red-400 shrink-0">📄</div>
-                    <div>
-                      <p className="text-white text-sm font-medium truncate max-w-[200px]">{cv.originalName || fmt(cv.path)}</p>
-                      <p className="text-gray-500 text-xs">PDF</p>
-                    </div>
-                  </div>
-                  <a href={cv.path} target="_blank" rel="noreferrer" className="text-xs bg-blue-500/20 text-blue-400 px-3 py-1.5 rounded-full hover:bg-blue-500/30 transition">Preview</a>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    );
+          )}
+        </div>
+      );
+    }
   };
 
   const openApp = (app) => {
@@ -581,7 +588,7 @@ export default function HomePage() {
         {apps.map(app => (
           <div key={app.id} className="w-20 flex flex-col items-center gap-1 cursor-pointer hover:bg-white/10 rounded-2xl p-2 transition group"
             onDoubleClick={() => openApp(app)}>
-            <div className="w-12 h-12 bg-gradient-to-br ${app.color} rounded-2xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-lg">{app.icon}</div>
+            <div className={`w-12 h-12 bg-gradient-to-br ${app.color} rounded-2xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-lg`}>{app.icon}</div>
             <span className="text-white/70 text-[10px] text-center leading-tight">{app.label}</span>
           </div>
         ))}
