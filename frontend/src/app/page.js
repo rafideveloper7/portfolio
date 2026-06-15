@@ -931,7 +931,7 @@ export default function HomePage() {
         <div className="flex items-center gap-2">
           <span>5G</span>
           <div className="w-5 h-2.5 border border-white/40 rounded-sm p-[1px] flex items-center">
-            <div className="w-full h-full bg-white/90 rounded-2xs" />
+            <div className="w-full h-full bg-black/10 rounded-2xs" />
           </div>
         </div>
       </div>
@@ -945,7 +945,7 @@ export default function HomePage() {
           <p className="text-xs text-white/70 font-medium mt-0.5">
             {currentDate}
           </p>
-          <div className="mt-3 px-3 py-1 bg-black/20 backdrop-blur-md rounded-full border border-white/5 flex items-center gap-1.5 text-[10px] text-white/90 font-mono">
+          <div className="mt-3 px-3 py-1 bg-black/10 backdrop-blur-md rounded-full border border-white/5 flex items-center gap-1.5 text-[10px] text-white/90 font-mono">
             <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
             <span>Book a free Meet/Call</span>
           </div>
@@ -978,7 +978,7 @@ export default function HomePage() {
 
       {/* Screen Content Modal Portals */}
       {activeApp && (
-        <div className="absolute inset-0 bg-white z-40 flex flex-col animate-slide-up">
+        <div className="absolute inset-0 bg-black z-40 flex flex-col animate-slide-up">
           <div className="h-12 border-b border-white/15 bg-slate-900/80 backdrop-blur-xl flex items-center justify-between px-3 shrink-0">
             <button
               onClick={() => setActiveApp(null)}
