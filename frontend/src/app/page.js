@@ -56,7 +56,7 @@ const apps = [
     name: "LinkedIn",
     icon: <FiLinkedin className="w-5 h-5 text-white" />,
     isExternal: true,
-    url: "https://linkedin.com/in/your-username", // Replace with your links
+    url: "https://www.linkedin.com/in/rafideveloper7", // Replace with your links
     color: "text-blue-500 hover:text-blue-400",
   },
   {
@@ -65,7 +65,7 @@ const apps = [
     name: "GitHub",
     icon: <FiGithub className="w-5 h-5 text-white" />,
     isExternal: true,
-    url: "https://github.com/your-username",
+    url: "https://github.com/rafideveloper7",
     color: "text-slate-200 hover:text-white",
   },
   {
@@ -74,7 +74,7 @@ const apps = [
     name: "Instagram",
     icon: <FiInstagram className="w-5 h-5 text-white" />,
     isExternal: true,
-    url: "https://instagram.com/your-username",
+    url: "https://instagram.com/rafideveloper7",
     color: "text-pink-500 hover:text-pink-400",
   },
   {
@@ -83,7 +83,7 @@ const apps = [
     label: "TikTok",
     icon: <BiLogoTiktok className="w-5 h-5 text-white" />,
     isExternal: true,
-    url: "https://tiktok.com/@your-username",
+    url: "https://tiktok.com/@rafideveloper7",
     color: "text-cyan-400 hover:text-cyan-300",
   },
   {
@@ -92,7 +92,7 @@ const apps = [
     name: "Facebook",
     icon: <FiFacebook className="w-5 h-5 text-white" />,
     isExternal: true,
-    url: "https://facebook.com/your-username",
+    url: "/",
     color: "text-blue-600 hover:text-blue-500",
   },
   {
@@ -213,7 +213,7 @@ export default function HomePage() {
     projects: 0,
     hours: 2400,
     clients: 12,
-    experience: 4,
+    experience: 2,
   });
   const dragRef = useRef(null);
 
