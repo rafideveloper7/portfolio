@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@react-three/fiber": "^8.18.0",
+    "ajax": "^0.0.4",
     "axios": "^1.6.0",
     "formidable": "^3.5.4",
     "next": "^14.0.0",

@@ -5,7 +5,7 @@ import { Toaster } from 'react-hot-toast';
 export const metadata = {
   title: 'Rafi Ullah - Full Stack Developer',
   description: 'Portfolio of Rafi Ullah - Full Stack Developer specializing in MERN Stack',
-  keywords: 'Rafi Ullah, Full Stack Developer, MERN Stack, Portfolio, React, Node.js',
+  keywords: 'Rafi Ullah, rafideveloper7, Rafi Orakzai, Full Stack Developer, MERN Stack, Portfolio, React, Node.js',
   authors: [{ name: 'Rafi Ullah' }],
 };
 
@@ -33,7 +33,7 @@ export default function RootLayout({ children }) {
           toastOptions={{
             style: {
               background: '#1a1f2e',
-              color: '#e8eaf0',
+              color: '#eef0e8',
               border: '0.5px solid rgba(79,156,249,0.2)',
               fontSize: '13px',
               maxWidth: '90vw',

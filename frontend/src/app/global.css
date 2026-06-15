@@ -1,4 +1,3 @@
-/* frontend/src/app/globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,239 +9,54 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-html {
-  /* Prevent font scaling on orientation change */
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #030712;
+  color: #f8fafc;
+  font-family: 'DM Sans', system-ui, sans-serif;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-}
-
-body {
-  font-family: 'DM Sans', system-ui, sans-serif;
-  background: #07090f;
-  color: #e8eaf0;
-  /* Prevent pull-to-refresh on mobile */
   overscroll-behavior: none;
-  touch-action: manipulation;
 }
 
-/* Prevent text selection during drag */
-.select-none { user-select: none; -webkit-user-select: none; }
-
-/* Custom Scrollbar */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); border-radius: 2px; }
-::-webkit-scrollbar-thumb { background: rgba(79,156,249,0.3); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(79,156,249,0.5); }
-
-/* Animations */
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-@keyframes twinkle { from{opacity:0.1} to{opacity:0.5} }
-@keyframes spin { to{transform:rotate(360deg)} }
-@keyframes fadeIn { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
-
-.spinner {
-  width: 32px; height: 32px;
-  border: 3px solid rgba(79,156,249,0.2);
-  border-top-color: #4f9cf9;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+/* Scrollbar System */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
 }
-
-.glass {
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(10px);
-  border: 0.5px solid rgba(255,255,255,0.08);
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
 }
-
-.star {
-  position: absolute;
-  border-radius: 50%;
-  background: white;
-  animation: twinkle infinite alternate;
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 99px;
 }
-
-/* Context Menu */
-.context-menu {
-  background: rgba(20,25,42,0.95);
-  backdrop-filter: blur(12px);
-  border: 0.5px solid rgba(255,255,255,0.1);
-  border-radius: 10px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-  z-index: 1000;
-  overflow: hidden;
-  min-width: 160px;
-}
-.menu-item {
-  padding: 9px 16px;
-  cursor: pointer;
-  transition: background 0.15s;
-  user-select: none;
-  font-size: 13px;
-  color: #e8eaf0;
-}
-.menu-item:hover { background: rgba(79,156,249,0.2); }
-.has-submenu::after { content:"▶"; float:right; opacity:0.6; font-size:0.75em; }
-.sub-menu {
-  background: rgba(20,25,42,0.97);
-  backdrop-filter: blur(12px);
-  border: 0.5px solid rgba(255,255,255,0.1);
-  border-radius: 10px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-  z-index: 1001;
-  overflow: hidden;
-  min-width: 160px;
-}
-.submenu-item {
-  padding: 9px 16px;
-  cursor: pointer;
-  transition: background 0.15s;
-  user-select: none;
-  white-space: nowrap;
-  font-size: 13px;
-  color: #e8eaf0;
-}
-.submenu-item:hover { background: rgba(79,156,249,0.2); }
-
-/* Mobile: hide scrollbar but keep scroll */
-@media (max-width: 767px) {
-  ::-webkit-scrollbar { display: none; }
-  * { scrollbar-width: none; }
-}
-
-/* Safelist gradient classes used dynamically */
-.from-indigo-950 { --tw-gradient-from: #1e1b4b; }
-.via-purple-900\/40 { --tw-gradient-via: rgb(88 28 135 / 0.4); }
-.from-gray-950 { --tw-gradient-from: #030712; }
-.via-cyan-900\/25 { --tw-gradient-via: rgb(22 78 99 / 0.25); }
-.via-orange-900\/20 { --tw-gradient-via: rgb(124 45 18 / 0.2); }
-
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(79, 156, 249, 0.3);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(79, 156, 249, 0.5);
-}
-
-/* Animations */
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 @keyframes twinkle {
-  from { opacity: 0.1; }
-  to { opacity: 0.5; }
+  0% { opacity: 0.1; }
+  100% { opacity: 0.6; }
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
 }
 
-/* Loading Spinner */
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(79, 156, 249, 0.2);
-  border-top-color: #4f9cf9;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-/* Glass Effect */
-.glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border: 0.5px solid rgba(255, 255, 255, 0.08);
+.animate-slide-up {
+  animation: slideUp 0.28s cubic-bezier(0.32, 0.94, 0.6, 1) forwards;
 }
 
-/* Star animation */
-.star {
-  position: absolute;
-  border-radius: 50%;
-  background: white;
-  animation: twinkle infinite alternate;
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
 }
 
-/* Window animations */
-.window-enter {
-  opacity: 0;
-  transform: scale(0.9);
-}
-
-.window-enter-active {
-  opacity: 1;
-  transform: scale(1);
-  transition: opacity 200ms, transform 200ms;
-}
-
-/* Context Menu Styles */
-.context-menu {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border: 0.5px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  z-index: 1000;
-  overflow: hidden;
-}
-
-.menu-item {
-  padding: 8px 16px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  user-select: none;
-}
-
-.menu-item:hover {
-  background: rgba(79, 156, 249, 0.2);
-}
-
-.has-submenu::after {
-  content: "▶";
-  float: right;
-  opacity: 0.7;
-  font-size: 0.8em;
-}
-
-.sub-menu {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(10px);
-  border: 0.5px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  margin-left: 8px;
-  z-index: 1001;
-  overflow: hidden;
-  min-width: 180px;
-}
-
-.submenu-item {
-  padding: 8px 16px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  user-select: none;
-  white-space: nowrap;
-}
-
-.submenu-item:hover {
-  background: rgba(79, 156, 249, 0.2);
-}
-
-/* Extra small screens (smartwatch ~180px+) */
-@media (max-width: 240px) {
-  body { font-size: 10px; }
-}

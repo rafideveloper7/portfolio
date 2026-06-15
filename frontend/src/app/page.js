@@ -1,78 +1,238 @@
-// frontend/src/app/page.js
-'use client';
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { FiUser, FiSend, FiChevronLeft, FiDownload, FiPlay, FiPause, FiSkipBack, FiSkipForward, FiVolume2, FiVolumeX, FiPicture, FiMail, FiMonitor, FiTrash2, FiEdit2, FiPlus, FiX, FiImage as FiImageIcon, FiSearch } from 'react-icons/fi';
-import toast from 'react-hot-toast';
-import axios from 'axios';
-import Gallery from '../components/Gallery';
-import MusicPlayer from '../components/MusicPlayer';
+"use client";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { BiLogoTiktok } from "react-icons/bi";
+import {
+  FiUser,
+  FiSend,
+  FiChevronLeft,
+  FiDownload,
+  FiX,
+  FiBriefcase,
+  FiCpu,
+  FiTerminal,
+  FiMail,
+  FiFolder,
+  FiMusic,
+  FiFileText,
+  FiFacebook,
+  FiInstagram,
+  FiGithub,
+  FiLinkedin,
+  FiMenu
+
+
+} from "react-icons/fi";
+import toast from "react-hot-toast";
+import axios from "axios"; // Fixed: Corrected import from 'ajax' to 'axios'
+import Gallery from "../components/Gallery";
+import MusicPlayer from "../components/MusicPlayer";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
-const FORMSUBMIT = 'https://formsubmit.co/ajax/rafideveloper7@gmail.com';
+const FORMSUBMIT = "https://formsubmit.co/ajax/rafideveloper7@gmail.com";
 
 const GRADIENT_MAP = {
-  'gradient-default': 'bg-gradient-to-br from-gray-900 via-blue-900/20 to-gray-900',
-  'gradient-purple':  'bg-gradient-to-br from-gray-900 via-purple-900/30 to-gray-900',
-  'gradient-green':   'bg-gradient-to-br from-gray-900 via-green-900/20 to-gray-900',
-  'gradient-red':     'bg-gradient-to-br from-gray-900 via-red-900/20 to-gray-900',
-  'gradient-dark':    'bg-gradient-to-br from-gray-950 to-gray-900',
-  'gradient-ocean':   'bg-gradient-to-br from-gray-900 via-cyan-900/25 to-gray-900',
-  'gradient-sunset':  'bg-gradient-to-br from-gray-900 via-orange-900/20 to-gray-900',
-  'gradient-galaxy':  'bg-gradient-to-br from-indigo-950 via-purple-900/40 to-gray-950',
+  "gradient-default":
+    "bg-gradient-to-br from-gray-900 via-blue-900/20 to-gray-900",
+  "gradient-purple":
+    "bg-gradient-to-br from-gray-900 via-purple-900/30 to-gray-900",
+  "gradient-green":
+    "bg-gradient-to-br from-gray-900 via-green-900/20 to-gray-900",
+  "gradient-red": "bg-gradient-to-br from-gray-900 via-red-900/20 to-gray-900",
+  "gradient-dark": "bg-gradient-to-br from-gray-950 to-gray-900",
+  "gradient-ocean":
+    "bg-gradient-to-br from-gray-900 via-cyan-900/25 to-gray-900",
+  "gradient-sunset":
+    "bg-gradient-to-br from-gray-900 via-orange-900/20 to-gray-900",
+  "gradient-galaxy":
+    "bg-gradient-to-br from-indigo-950 via-purple-900/40 to-gray-950",
 };
 
 const apps = [
-  { id: 'about',    label: 'About Me',  icon: '👤', color: 'from-blue-600 to-blue-800',    width: 480, height: 450 },
-  { id: 'projects', label: 'Projects',  icon: '💼', color: 'from-green-600 to-green-800',  width: 550, height: 500 },
-  { id: 'skills',   label: 'Skills',    icon: '⚡', color: 'from-yellow-500 to-orange-600', width: 500, height: 480 },
-  { id: 'terminal', label: 'Terminal',  icon: '💻', color: 'from-gray-600 to-gray-800',    width: 550, height: 400 },
-  { id: 'contact',  label: 'Contact',   icon: '📬', color: 'from-red-500 to-pink-700',     width: 450, height: 500 },
-  { id: 'gallery',  label: 'Gallery',   icon: '🖼️', color: 'from-purple-600 to-purple-800', width: 560, height: 460 },
-  { id: 'music',    label: 'Music',     icon: '🎵', color: 'from-pink-600 to-rose-700',    width: 520, height: 480 },
-  { id: 'cv',       label: 'CV',        icon: '📄', color: 'from-indigo-600 to-indigo-800', width: 600, height: 650 },
+  // --- EXTERNAL SOCIAL MEDIA ACCELERATORS ---
+  {
+    id: "linkedin",
+    label: "LinkedIn",
+    name: "LinkedIn",
+    icon: <FiLinkedin className="w-5 h-5 text-white" />,
+    isExternal: true,
+    url: "https://linkedin.com/in/your-username", // Replace with your links
+    color: "text-blue-500 hover:text-blue-400",
+  },
+  {
+    id: "github",
+    label: "GitHub",
+    name: "GitHub",
+    icon: <FiGithub className="w-5 h-5 text-white" />,
+    isExternal: true,
+    url: "https://github.com/your-username",
+    color: "text-slate-200 hover:text-white",
+  },
+  {
+    id: "instagram",
+    label: "Instagram",
+    name: "Instagram",
+    icon: <FiInstagram className="w-5 h-5 text-white" />,
+    isExternal: true,
+    url: "https://instagram.com/your-username",
+    color: "text-pink-500 hover:text-pink-400",
+  },
+  {
+    id: "tiktok",
+    name: "TikTok",
+    label: "TikTok",
+    icon: <BiLogoTiktok className="w-5 h-5 text-white" />,
+    isExternal: true,
+    url: "https://tiktok.com/@your-username",
+    color: "text-cyan-400 hover:text-cyan-300",
+  },
+  {
+    label: "Facebook",
+    id: "facebook",
+    name: "Facebook",
+    icon: <FiFacebook className="w-5 h-5 text-white" />,
+    isExternal: true,
+    url: "https://facebook.com/your-username",
+    color: "text-blue-600 hover:text-blue-500",
+  },
+  {
+    id: "about",
+    label: "About Me",
+    icon: <FiUser className="w-5 h-5 text-white" />,
+    // color: "from-green-300 to-green-700",
+    width: 520,
+    height: 500,
+    dock: false,
+  },
+  {
+    id: "projects",
+    label: "Projects",
+    icon: <FiBriefcase className="w-5 h-5 text-white" />,
+    color: "from-emerald-500 to-teal-700",
+    width: 640,
+    height: 550,
+    dock: false,
+  },
+  {
+    id: "skills",
+    label: "Skills",
+    icon: <FiCpu className="w-5 h-5 text-white" />,
+    color: "from-amber-500 to-orange-600",
+    width: 540,
+    height: 500,
+    dock: false,
+  },
+  {
+    id: "terminal",
+    label: "Terminal",
+    icon: <FiTerminal className="w-5 h-5 text-emerald-400" />,
+    color: "from-zinc-800 to-gray-950",
+    width: 600,
+    height: 420,
+    dock: false,
+  },
+  {
+    id: "contact",
+    label: "Contact",
+    icon: <FiMail className="w-5 h-5 text-white" />,
+    color: "from-rose-500 to-pink-700",
+    width: 500,
+    height: 520,
+    dock: false,
+  },
+  {
+    id: "gallery",
+    label: "Gallery",
+    icon: <FiFolder className="w-5 h-5 text-white" />,
+    color: "from-violet-500 to-purple-700",
+    width: 640,
+    height: 520,
+    dock: false,
+  },
+  {
+    id: "music",
+    label: "Music",
+    icon: <FiMusic className="w-5 h-5 text-white" />,
+    color: "from-pink-500 to-rose-600",
+    width: 540,
+    height: 500,
+    dock: false,
+  },
+  {
+    id: "cv",
+    label: "CV",
+    icon: <FiFileText className="w-5 h-5 text-white" />,
+    color: "from-indigo-500 to-indigo-700",
+    width: 680,
+    height: 680,
+    dock: false,
+  },
+
 ];
 
 const statusMessages = [
-  '👋 Welcome! I\'m Rafi Ullah — a Full Stack Developer.',
-  '🚀 I build beautiful, functional, scalable apps.',
-  '☁️ Full Stack: MERN, Next.js, Node.js, Express, MongoDB.',
-  '⚡ Passionate about clean code & modern UI/UX design.',
-  '🎨 Designer-level aesthetics with developer precision.',
-  '💡 Let\'s build something amazing together!',
+  "👋 Welcome! I'm Rafi Ullah — a Full Stack Developer.",
+  "🚀 I build beautiful, functional, scalable apps.",
+  "☁️ Full Stack: MERN, Next.js, Node.js, Express, MongoDB.",
+  "⚡ Passionate about clean code & modern UI/UX design.",
+  "💡 Let's build something amazing together!",
 ];
 
 export default function HomePage() {
   const router = useRouter();
-  const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
   const [sending, setSending] = useState(false);
   const [windows, setWindows] = useState({});
   const [bio, setBio] = useState(null);
   const [projects, setProjects] = useState([]);
   const [skills, setSkills] = useState([]);
   const [cvs, setCvs] = useState([]);
-  const [terminalInput, setTerminalInput] = useState('');
+  const [terminalInput, setTerminalInput] = useState("");
   const [terminalOutput, setTerminalOutput] = useState([]);
   const [zIndex, setZIndex] = useState(10);
-  const [time, setTime] = useState('');
-  const [wallpaper, setWallpaper] = useState({ type: 'gradient', value: '' });
-  const [mobileWallpaper, setMobileWallpaper] = useState({ type: 'gradient', value: '' });
+  const [time, setTime] = useState("");
+  const [currentDate, setCurrentDate] = useState("");
+  const [wallpaper, setWallpaper] = useState({
+    type: "gradient",
+    value: "gradient-default",
+  });
+  const [mobileWallpaper, setMobileWallpaper] = useState({
+    type: "gradient",
+    value: "gradient-galaxy",
+  });
   const [isMobile, setIsMobile] = useState(false);
   const [activeApp, setActiveApp] = useState(null);
   const [statusMsg, setStatusMsg] = useState(statusMessages[0]);
   const [activeCvIdx, setActiveCvIdx] = useState(0);
-  const [stats, setStats] = useState({ projects: 0, hours: 2400, clients: 12, experience: 4 });
+  const [stats, setStats] = useState({
+    projects: 0,
+    hours: 2400,
+    clients: 12,
+    experience: 4,
+  });
   const dragRef = useRef(null);
 
-  const API_BASE = API || 'http://localhost:5000';
+  const API_BASE = API || "http://localhost:5001";
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
+    const check = () => setIsMobile(window.innerWidth < 1024);
     check();
-    window.addEventListener('resize', check);
-    fetchData(); createStars(); updateClock(); cycleStatus();
+    window.addEventListener("resize", check);
+    fetchData();
+    createStars();
+    updateClock();
+    const cycleCleanup = cycleStatus();
     const t = setInterval(updateClock, 1000);
-    return () => { clearInterval(t); window.removeEventListener('resize', check); };
+    return () => {
+      clearInterval(t);
+      cycleCleanup();
+      window.removeEventListener("resize", check);
+    };
   }, []);
 
   const cycleStatus = () => {
@@ -84,7 +244,17 @@ export default function HomePage() {
     return () => clearInterval(interval);
   };
 
-  const updateClock = () => setTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+  const updateClock = () => {
+    const now = new Date();
+    setTime(now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+    setCurrentDate(
+      now.toLocaleDateString([], {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      }),
+    );
+  };
 
   const fetchData = async () => {
     try {
@@ -95,532 +265,875 @@ export default function HomePage() {
         axios.get(`${API_BASE}/api/settings`).catch(() => ({ data: null })),
         axios.get(`${API_BASE}/api/cv/list`).catch(() => ({ data: [] })),
       ]);
-      setBio(bioRes.data || { name: 'Rafi Ullah', title: 'Full Stack Developer', location: 'Kohat, Pakistan', email: 'rafideveloper7@gmail.com' });
+      setBio(
+        bioRes.data || {
+          name: "Rafi Ullah",
+          title: "Full Stack Developer",
+          location: "Kohat, Pakistan",
+          email: "rafideveloper7@gmail.com",
+        },
+      );
       setProjects(projRes.data || []);
       setSkills(skillRes.data || []);
-      setStats(s => ({ ...s, projects: (projRes.data || []).length, experience: bioRes.data?.experience || 4 }));
+      setStats((s) => ({
+        ...s,
+        projects: (projRes.data || []).length,
+        experience: bioRes.data?.experience || 4,
+      }));
       setCvs(cvRes.data || []);
       if (settRes.data) {
-        setWallpaper({ type: settRes.data.wallpaperType || 'gradient', value: settRes.data.wallpaperValue || '' });
-        setMobileWallpaper({ type: settRes.data.mobileWallpaperType || 'gradient', value: settRes.data.mobileWallpaperValue || '' });
+        setWallpaper({
+          type: settRes.data.wallpaperType || "gradient",
+          value: settRes.data.wallpaperValue || "gradient-default",
+        });
+        setMobileWallpaper({
+          type: settRes.data.mobileWallpaperType || "gradient",
+          value: settRes.data.mobileWallpaperValue || "gradient-galaxy",
+        });
       }
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const createStars = () => {
-    const c = document.getElementById('stars');
+    const c = document.getElementById("stars");
     if (!c) return;
-    c.innerHTML = '';
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const count = prefersReduced ? 30 : 80;
+    c.innerHTML = "";
+    const count = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ? 25
+      : 60;
     for (let i = 0; i < count; i++) {
-      const s = document.createElement('div');
-      s.className = 'star';
-      const size = prefersReduced ? 1 : (Math.random() * 2.5 + 1);
-      s.style.cssText = `position:absolute;width:${size}px;height:${size}px;background:white;border-radius:50%;left:${Math.random()*100}%;top:${Math.random()*100}%;opacity:${Math.random()*0.4+0.15};animation:twinkle ${Math.random()*4+2}s infinite alternate;animation-delay:${Math.random()*4}s;`;
+      const s = document.createElement("div");
+      s.className = "star";
+      const size = Math.random() * 2 + 1;
+      s.style.cssText = `position:absolute;width:${size}px;height:${size}px;background:white;border-radius:50%;left:${Math.random() * 100}%;top:${Math.random() * 100}%;opacity:${Math.random() * 0.3 + 0.1};animation:twinkle ${Math.random() * 4 + 2}s infinite alternate;`;
       c.appendChild(s);
     }
   };
 
   const getBgStyle = (wp) => {
-    if (wp.type === 'image' && wp.value) return { backgroundImage: `url(${wp.value})`, backgroundSize: 'cover', backgroundPosition: 'center' };
-    if (wp.type === 'color' && wp.value) return { background: wp.value };
+    if (wp.type === "image" && wp.value)
+      return {
+        backgroundImage: `url(${wp.value})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      };
+    if (wp.type === "color" && wp.value) return { backgroundColor: wp.value };
     return {};
   };
 
-  const getBgClass = (wp) => wp.type === 'gradient' ? (GRADIENT_MAP[wp.value] || GRADIENT_MAP['gradient-default']) : '';
+  const getBgClass = (wp) =>
+    wp.type === "gradient"
+      ? GRADIENT_MAP[wp.value] || GRADIENT_MAP["gradient-default"]
+      : "";
 
-  // ── Desktop window management ────────────────────────────────────
-  const openWindow = (id, title, width, height) => {
-    const newZ = zIndex + 1; setZIndex(newZ);
-    if (windows[id]?.visible) { setWindows(p => ({ ...p, [id]: { ...p[id], zIndex: newZ } })); return; }
-    const vw = window.innerWidth, vh = window.innerHeight;
-    const w = Math.min(width || 500, vw - 16), h = Math.min(height || 400, vh - 80);
-    setWindows(p => ({ ...p, [id]: { id, title, visible: true, zIndex: newZ, x: Math.max(8, (vw-w)/2|0), y: Math.max(36, (vh-h)/3|0), width: w, height: h } }));
+  const handleAppLaunch = (app) => {
+    if (isMobile) {
+      setActiveApp(app.id);
+    } else {
+      const newZ = zIndex + 1;
+      setZIndex(newZ);
+      setWindows((prev) => ({
+        ...prev,
+        [app.id]: {
+          id: app.id,
+          title: app.label,
+          visible: true,
+          zIndex: newZ,
+          x: Math.max(20, ((window.innerWidth - app.width) / 2) | 0),
+          y: Math.max(60, ((window.innerHeight - app.height) / 2.5) | 0),
+          width: Math.min(app.width, window.innerWidth - 40),
+          height: Math.min(app.height, window.innerHeight - 120),
+        },
+      }));
+    }
   };
-  const closeWindow = (id) => setWindows(p => ({ ...p, [id]: { ...p[id], visible: false } }));
-  const focusWindow = (id) => { const z = zIndex+1; setZIndex(z); setWindows(p => ({ ...p, [id]: { ...p[id], zIndex: z } })); };
 
-  const startDrag = useCallback((cx, cy, id) => {
-    setWindows(prev => {
-      const win = prev[id]; if (!win) return prev;
-      dragRef.current = { id, startX: cx, startY: cy, origX: win.x, origY: win.y, winW: win.width, winH: win.height };
-      return { ...prev, [id]: { ...win, zIndex: zIndex + 1 } };
-    });
-    setZIndex(z => z + 1);
-    const move = (x, y) => {
-      if (!dragRef.current) return;
-      const { id: wid, startX, startY, origX, origY, winW, winH } = dragRef.current;
-      setWindows(p => { if (!p[wid]) return p; return { ...p, [wid]: { ...p[wid], x: Math.max(0, Math.min(window.innerWidth-winW, origX+x-startX)), y: Math.max(32, Math.min(window.innerHeight-48, origY+y-startY)) } }; });
-    };
-    const mm = e => move(e.clientX, e.clientY);
-    const tm = e => { e.preventDefault(); move(e.touches[0].clientX, e.touches[0].clientY); };
-    const stop = () => { dragRef.current = null; window.removeEventListener('mousemove', mm); window.removeEventListener('mouseup', stop); window.removeEventListener('touchmove', tm); window.removeEventListener('touchend', stop); };
-    window.addEventListener('mousemove', mm); window.addEventListener('mouseup', stop);
-    window.addEventListener('touchmove', tm, { passive: false }); window.addEventListener('touchend', stop);
-  }, [zIndex]);
+  const closeWindow = (id) => {
+    if (isMobile) {
+      setActiveApp(null);
+    } else {
+      setWindows((p) => ({ ...p, [id]: { ...p[id], visible: false } }));
+    }
+  };
+
+  const focusWindow = (id) => {
+    const z = zIndex + 1;
+    setZIndex(z);
+    setWindows((p) => ({ ...p, [id]: { ...p[id], zIndex: z } }));
+  };
+
+  const startDrag = useCallback(
+    (cx, cy, id) => {
+      setWindows((prev) => {
+        const win = prev[id];
+        if (!win) return prev;
+        dragRef.current = {
+          id,
+          startX: cx,
+          startY: cy,
+          origX: win.x,
+          origY: win.y,
+          winW: win.width,
+          winH: win.height,
+        };
+        return { ...prev, [id]: { ...win, zIndex: zIndex + 1 } };
+      });
+      setZIndex((z) => z + 1);
+
+      const move = (x, y) => {
+        if (!dragRef.current) return;
+        const {
+          id: wid,
+          startX,
+          startY,
+          origX,
+          origY,
+          winW,
+          winH,
+        } = dragRef.current;
+        setWindows((p) => {
+          if (!p[wid]) return p;
+          return {
+            ...p,
+            [wid]: {
+              ...p[wid],
+              x: Math.max(
+                0,
+                Math.min(window.innerWidth - winW, origX + x - startX),
+              ),
+              y: Math.max(
+                40,
+                Math.min(window.innerHeight - 48, origY + y - startY),
+              ),
+            },
+          };
+        });
+      };
+      const mm = (e) => move(e.clientX, e.clientY);
+      const tm = (e) => {
+        e.preventDefault();
+        move(e.touches[0].clientX, e.touches[0].clientY);
+      };
+      const stop = () => {
+        dragRef.current = null;
+        window.removeEventListener("mousemove", mm);
+        window.removeEventListener("mouseup", stop);
+        window.removeEventListener("touchmove", tm);
+        window.removeEventListener("touchend", stop);
+      };
+      window.addEventListener("mousemove", mm);
+      window.addEventListener("mouseup", stop);
+      window.addEventListener("touchmove", tm, { passive: false });
+      window.addEventListener("touchend", stop);
+    },
+    [zIndex],
+  );
 
   const handleContactSubmit = async (e) => {
-    e.preventDefault(); setSending(true);
+    e.preventDefault();
+    setSending(true);
     try {
-      // 1) Save to backend DB
       await axios.post(`${API_BASE}/api/contact`, formData);
-      // 2) Send direct email via FormSubmit
       const res = await fetch(FORMSUBMIT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ name: formData.name, email: formData.email, subject: formData.subject, message: formData.message }),
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(formData),
       });
       const data = await res.json();
-      if (data.message === 'error' || !res.ok) throw new Error('FormSubmit error');
-      toast.success('Message sent! ✓');
-      setFormData({ name:'',email:'',subject:'',message:'' });
-      closeWindow('contact'); setActiveApp(null);
-    } catch { toast.error('Failed to send. Please try again.'); } finally { setSending(false); }
+      if (data.message === "error" || !res.ok)
+        throw new Error("FormSubmit error");
+      toast.success("Message parameters pushed successfully!");
+      setFormData({ name: "", email: "", subject: "", message: "" });
+      closeWindow("contact");
+      setActiveApp(null);
+    } catch {
+      toast.error("Pipeline blocked. Try again.");
+    } finally {
+      setSending(false);
+    }
   };
 
   const handleTerminalCommand = (e) => {
-    if (e.key !== 'Enter') return;
-    const cmd = terminalInput.toLowerCase().trim(); let out = '';
-    if (cmd === 'help') out = 'whoami · skills · projects · contact · open admin · clear';
-    else if (cmd === 'whoami') out = `${bio?.name} — ${bio?.title}\n📍 ${bio?.location}\n📧 ${bio?.email}`;
-    else if (cmd === 'skills') out = skills.map(s=>`📌 ${s.category}: ${s.skills.map(sk=>sk.name).join(', ')}`).join('\n') || 'No skills.';
-    else if (cmd === 'projects') out = projects.map(p=>`📁 ${p.title} — ${p.stack}`).join('\n') || 'No projects.';
-    else if (cmd === 'contact') out = `📧 ${bio?.email}\n🐙 github.com/rafideveloper7`;
-    else if (cmd === 'open admin') { router.push('/admin/login'); out = 'Opening admin...'; }
-    else if (cmd === 'clear') { setTerminalOutput([]); setTerminalInput(''); return; }
-    else if (cmd) out = `Not found: ${cmd}. Type 'help'.`;
-    if (out) setTerminalOutput(p => [...p, { command: terminalInput, output: out }]);
-    setTerminalInput('');
+    if (e.key !== "Enter") return;
+    const cmd = terminalInput.toLowerCase().trim();
+    let out = "";
+    if (cmd === "help")
+      out = "whoami · skills · projects · contact · open admin · clear";
+    else if (cmd === "whoami")
+      out = `${bio?.name} — ${bio?.title}\n📍 ${bio?.location}\n📧 ${bio?.email}`;
+    else if (cmd === "skills")
+      out =
+        skills
+          .map(
+            (s) =>
+              `📌 ${s.category}: ${s.skills.map((sk) => sk.name).join(", ")}`,
+          )
+          .join("\n") || "No skills mapped.";
+    else if (cmd === "projects")
+      out =
+        projects.map((p) => `📁 ${p.title} — ${p.stack}`).join("\n") ||
+        "No localized data clusters.";
+    else if (cmd === "contact")
+      out = `📧 ${bio?.email}\n🐙 github.com/rafideveloper7`;
+    else if (cmd === "open admin") {
+      router.push("/admin/login");
+      out = "Redirecting execution node...";
+    } else if (cmd === "clear") {
+      setTerminalOutput([]);
+      setTerminalInput("");
+      return;
+    } else if (cmd)
+      out = `Command not recognized: '${cmd}'. Type 'help' for schema mapping.`;
+
+    if (out)
+      setTerminalOutput((p) => [...p, { command: terminalInput, output: out }]);
+    setTerminalInput("");
   };
 
-  const fmt = (url) => (url || '').split('/').pop().split('?')[0].replace(/\.pdf$/i, '').replace(/^v\d+\//, '');
+  const fmt = (url) =>
+    (url || "")
+      .split("/")
+      .pop()
+      .split("?")[0]
+      .replace(/\.pdf$/i, "")
+      .replace(/^v\d+\//, "");
 
-  // ── Window content (shared desktop + mobile) ─────────────────────
   const renderContent = (id) => {
-    if (id === 'about') {
-      const bioImage = bio?.image;
+    if (id === "about") {
       return (
-        <div className="h-full overflow-auto">
-          {/* Hero banner */}
-          <div className="relative h-40 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 overflow-hidden">
-            <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px]" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                {bioImage && (
-                  <img src={bioImage} alt={bio?.name} className="w-20 h-20 rounded-full border-2 border-white/80 mx-auto mb-2 object-cover shadow-xl" />
-                )}
-                {!bioImage && (
-                  <div className="w-20 h-20 bg-white/20 rounded-full mx-auto mb-2 flex items-center justify-center text-4xl backdrop-blur-sm border border-white/30">👨‍💻</div>
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="p-5 -mt-6 relative">
-            <div className="text-center mb-4">
-              <h2 className="text-2xl font-bold text-white">{bio?.name || 'Rafi Ullah'}</h2>
-              <p className="text-blue-400 text-sm font-medium mt-0.5">{bio?.title || 'Full Stack Developer'}</p>
-              {bio?.location && (
-                <p className="text-gray-400 text-xs mt-1">📍 {bio.location}</p>
+        <div className="h-full overflow-y-auto bg-slate-950/60 text-slate-100 custom-scrollbar p-5 space-y-6">
+          <div className="flex flex-col sm:flex-row items-center gap-5 bg-slate-900/50 p-5 rounded-2xl border border-white/5">
+            <div className="relative shrink-0">
+              <div className="absolute inset-0 bg-blue-500 rounded-full blur opacity-40 animate-pulse" />
+              {bio?.image ? (
+                <img
+                  src={bio.image}
+                  alt={bio?.name}
+                  className="relative w-20 h-20 rounded-full object-cover border border-white/20"
+                />
+              ) : (
+                <div className="relative w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center text-2xl border border-white/10">
+                  <FiUser />
+                </div>
               )}
             </div>
-
-            <p className="text-gray-300 text-sm leading-relaxed mb-5">{bio?.bio || 'Full Stack Developer passionate about building modern web applications.'}</p>
-
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-2 mb-5">
-              {[
-                { label: 'Experience', value: `${stats.experience}+ yrs` },
-                { label: 'Projects', value: stats.projects },
-                { label: 'Clients', value: stats.clients },
-              ].map((s, i) => (
-                <div key={i} className="text-center bg-white/5 border border-white/10 rounded-2xl py-3 px-2">
-                  <p className="text-lg font-bold text-white">{s.value}</p>
-                  <p className="text-gray-400 text-[10px] uppercase tracking-wider mt-0.5">{s.label}</p>
-                </div>
-              ))}
+            <div className="text-center sm:text-left flex-1 min-w-0">
+              <h2 className="text-xl font-bold tracking-tight text-white truncate">
+                {bio?.name || "Rafi Ullah"}
+              </h2>
+              <p className="text-xs text-cyan-400 font-mono tracking-wider mt-0.5">
+                {bio?.title || "Full Stack Developer"}
+              </p>
+              <p className="text-xs text-slate-400 mt-2 flex items-center justify-center sm:justify-start gap-1">
+                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />{" "}
+                {bio?.location || "Kohat, Pakistan"}
+              </p>
             </div>
+          </div>
 
-            <div className="grid grid-cols-2 gap-2 mb-5">
-              {[
-                { label: 'Email', value: bio?.email },
-                { label: 'Phone', value: bio?.phone },
-                { label: 'GitHub', value: bio?.github },
-                { label: 'LinkedIn', value: bio?.linkedin },
-              ].filter(s => s.value).map((s, i) => (
-                <div key={i} className="bg-white/5 rounded-2xl p-3 border border-white/10">
-                  <p className="text-[10px] text-gray-500 uppercase tracking-wider">{s.label}</p>
-                  {s.label === 'Email' ? (
-                    <a href={`mailto:${s.value}`} className="text-sm text-blue-400 break-all mt-1 hover:underline">{s.value}</a>
-                  ) : s.label === 'GitHub' || s.label === 'LinkedIn' ? (
-                    <a href={s.value} target="_blank" rel="noreferrer" className="text-sm text-blue-400 mt-1 hover:underline block truncate">{new URL(s.value).pathname.replace(/^\//,'')}</a>
-                  ) : (
-                    <p className="text-sm text-white mt-1">{s.value}</p>
+          <div className="bg-slate-900/30 p-4 rounded-2xl border border-white/5 text-sm text-slate-300 leading-relaxed">
+            {bio?.bio ||
+              "Full Stack Developer passionate about clean structures, custom execution pipelines, and robust responsive designs."}
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              {
+                label: "Experience",
+                value: `${stats.experience} Yrs`,
+                text: "text-blue-400",
+              },
+              {
+                label: "Projects",
+                value: stats.projects,
+                text: "text-emerald-400",
+              },
+              {
+                label: "Clients",
+                value: stats.clients,
+                text: "text-purple-400",
+              },
+            ].map((s, i) => (
+              <div
+                key={i}
+                className="bg-white/[0.02] border border-white/5 rounded-xl p-3 text-center"
+              >
+                <p className={`text-base font-bold font-mono ${s.text}`}>
+                  {s.value}
+                </p>
+                <p className="text-[10px] text-slate-500 uppercase mt-0.5 tracking-wider">
+                  {s.label}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {[
+              {
+                label: "Primary Route",
+                value: bio?.email,
+                link: `mailto:${bio?.email}`,
+              },
+              {
+                label: "Network Matrix",
+                value: "LinkedIn Profile",
+                link: bio?.linkedin,
+              },
+              {
+                label: "Code Cluster",
+                value: "GitHub Engine",
+                link: bio?.github,
+              },
+            ]
+              .filter((f) => f.link)
+              .map((network, index) => (
+                <a
+                  key={index}
+                  href={network.link}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex justify-between items-center bg-white/[0.02] hover:bg-white/[0.05] border border-white/5 rounded-xl p-3 text-xs text-slate-300 transition-colors"
+                >
+                  <span className="text-slate-500 font-medium">
+                    {network.label}
+                  </span>
+                  <span className="text-blue-400 font-mono text-[11px] truncate max-w-[60%]">
+                    {network.value}
+                  </span>
+                </a>
+              ))}
+          </div>
+        </div>
+      );
+    }
+
+    if (id === "projects") {
+      return (
+        <div className="p-4 space-y-4 overflow-y-auto h-full bg-slate-950/40 custom-scrollbar">
+          {projects.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-slate-500 font-mono text-xs">
+              <FiBriefcase className="text-2xl mb-2 text-slate-600" />{" "}
+              [EMPTY_CLUSTER_REGISTRY]
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {projects.map((p, i) => (
+                <div
+                  key={p._id || i}
+                  className="bg-slate-900/50 border border-white/5 rounded-2xl overflow-hidden flex flex-col justify-between hover:border-blue-500/30 transition-colors"
+                >
+                  {p.image && (
+                    <div className="h-36 bg-slate-950 relative overflow-hidden">
+                      <img
+                        src={p.image}
+                        alt={p.title}
+                        className="w-full h-full object-cover opacity-80"
+                      />
+                    </div>
                   )}
+                  <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
+                    <div>
+                      <h3 className="font-bold text-white text-sm tracking-tight">
+                        {p.title}
+                      </h3>
+                      <p className="text-xs text-slate-400 line-clamp-3 mt-1.5 leading-relaxed">
+                        {p.description}
+                      </p>
+                    </div>
+                    <div>
+                      {p.stack && (
+                        <div className="flex flex-wrap gap-1 mb-3">
+                          {p.stack.split(",").map((tech, idx) => (
+                            <span
+                              key={idx}
+                              className="text-[10px] font-mono bg-white/5 text-slate-400 px-2 py-0.5 rounded border border-white/5"
+                            >
+                              {tech.trim()}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <div className="grid grid-cols-2 gap-2 text-center text-xs font-semibold pt-2 border-t border-white/5">
+                        {p.liveLink && (
+                          <a
+                            href={p.liveLink}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="bg-blue-600 hover:bg-blue-500 text-white py-1.5 rounded-lg transition-colors"
+                          >
+                            Live Demo
+                          </a>
+                        )}
+                        {p.githubLink && (
+                          <a
+                            href={p.githubLink}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="bg-white/5 hover:bg-white/10 text-slate-300 py-1.5 rounded-lg transition-colors border border-white/5"
+                          >
+                            Source
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
+          )}
+        </div>
+      );
+    }
 
-            {bio?.funFacts?.length && (
-              <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4">
-                <p className="text-blue-400 text-[10px] font-bold uppercase tracking-widest mb-2">Fun Facts</p>
-                <ul className="space-y-1.5">
-                  {bio.funFacts.map((f, i) => (
-                    <li key={i} className="text-sm text-gray-300 flex items-center gap-2"><span className="text-blue-400">✦</span>{f}</li>
+    if (id === "skills") {
+      return (
+        <div className="p-4 space-y-4 overflow-y-auto h-full bg-slate-950/40 custom-scrollbar">
+          {skills.length === 0 ? (
+            <div className="text-center text-slate-600 py-20 font-mono text-xs">
+              [INDEX_NOT_MAPPED]
+            </div>
+          ) : (
+            skills.map((cat, i) => (
+              <div
+                key={i}
+                className="bg-slate-900/40 border border-white/5 rounded-2xl p-4"
+              >
+                <p className="text-cyan-400 text-[10px] font-mono uppercase tracking-widest border-b border-white/5 pb-1.5 mb-3">
+                  // {cat.category}
+                </p>
+                <div className="space-y-3">
+                  {(cat.skills || []).map((sk, j) => (
+                    <div key={j}>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-slate-300 font-medium">
+                          {sk.name}
+                        </span>
+                        <span className="text-slate-500 font-mono text-[10px]">
+                          {sk.percentage}%
+                        </span>
+                      </div>
+                      <div className="h-1 bg-slate-950 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-blue-500 to-cyan-400"
+                          style={{ width: `${sk.percentage}%` }}
+                        />
+                      </div>
+                    </div>
                   ))}
-                </ul>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      );
+    }
+
+    if (id === "terminal") {
+      return (
+        <div className="bg-slate-950 h-full flex flex-col font-mono text-slate-300">
+          <div className="flex items-center justify-between px-4 h-9 bg-slate-900/60 border-b border-white/5 text-[10px] text-slate-500 uppercase tracking-wider select-none shrink-0">
+            <span>Terminal Kernel Instance</span>
+            <span className="text-emerald-500">Online</span>
+          </div>
+          <div className="flex-1 p-4 text-xs overflow-y-auto space-y-3 custom-scrollbar">
+            <p className="text-slate-500">
+              System initialization complete. Type{" "}
+              <span className="text-cyan-400 font-bold">help</span> to scan
+              layout instructions.
+            </p>
+            {terminalOutput.map((item, i) => (
+              <div key={i} className="space-y-1">
+                <p className="text-blue-400 font-bold">
+                  <span className="text-slate-600">❯</span> {item.command}
+                </p>
+                <p className="text-slate-400 whitespace-pre-wrap pl-3 border-l border-slate-800 text-[11px]">
+                  {item.output}
+                </p>
+              </div>
+            ))}
+          </div>
+          <div className="border-t border-white/5 p-2 bg-slate-900/20 flex items-center gap-2 shrink-0">
+            <span className="text-cyan-400 ml-1">❯</span>
+            <input
+              type="text"
+              value={terminalInput}
+              onChange={(e) => setTerminalInput(e.target.value)}
+              onKeyDown={handleTerminalCommand}
+              className="flex-1 bg-transparent border-none outline-none text-white text-xs font-mono"
+              placeholder="Enter routine task..."
+              autoFocus
+            />
+          </div>
+        </div>
+      );
+    }
+
+    if (id === "contact") {
+      return (
+        <div className="p-5 overflow-y-auto h-full bg-slate-950/40 custom-scrollbar flex flex-col justify-center">
+          <form
+            onSubmit={handleContactSubmit}
+            className="space-y-3 max-w-sm mx-auto w-full"
+          >
+            <div className="text-center mb-4">
+              <h3 className="text-white font-bold text-base">
+                Direct Pipeline Link
+              </h3>
+              <p className="text-slate-400 text-xs mt-1">
+                Populate parameters to transmit mail payload directly.
+              </p>
+            </div>
+            <input
+              type="text"
+              placeholder="Name"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+              className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white text-xs outline-none focus:border-blue-500/50 transition-colors"
+              required
+            />
+            <input
+              type="email"
+              placeholder="Email Cluster"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+              className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white text-xs outline-none focus:border-blue-500/50 transition-colors"
+              required
+            />
+            <input
+              type="text"
+              placeholder="Subject Token"
+              value={formData.subject}
+              onChange={(e) =>
+                setFormData({ ...formData, subject: e.target.value })
+              }
+              className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white text-xs outline-none focus:border-blue-500/50 transition-colors"
+              required
+            />
+            <textarea
+              placeholder="Message Parameters..."
+              rows={4}
+              value={formData.message}
+              onChange={(e) =>
+                setFormData({ ...formData, message: e.target.value })
+              }
+              className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-white text-xs outline-none resize-none focus:border-blue-500/50 transition-colors"
+              required
+            />
+            <button
+              type="submit"
+              disabled={sending}
+              className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl transition-colors disabled:opacity-40 text-xs tracking-wide uppercase font-mono"
+            >
+              {sending ? "Streaming..." : "Transmit Payload"}
+            </button>
+          </form>
+        </div>
+      );
+    }
+
+    if (id === "gallery")
+      return (
+        <div className="h-full overflow-hidden">
+          <Gallery />
+        </div>
+      );
+    if (id === "music")
+      return (
+        <div className="h-full overflow-hidden">
+          <MusicPlayer />
+        </div>
+      );
+
+    if (id === "cv") {
+      return (
+        <div className="h-full flex flex-col bg-slate-900/60">
+          {/* Top Control Header */}
+          <div className="p-3 border-b border-white/5 flex items-center justify-between bg-black/20 shrink-0 gap-2">
+            <select
+              onChange={(e) => setActiveCvIdx(Number(e.target.value))}
+              value={activeCvIdx}
+              className="bg-slate-950 text-white text-xs border border-white/10 rounded-lg p-1.5 outline-none max-w-[55%] truncate"
+            >
+              {cvs &&
+                cvs.map((c, idx) => (
+                  <option key={idx} value={idx}>
+                    {c.originalName || `CV Entry #${idx + 1}`}
+                  </option>
+                ))}
+            </select>
+
+            {/* Download Link Block */}
+            {cvs && cvs[activeCvIdx] && (
+              <a
+                href={cvs[activeCvIdx].path || cvs[activeCvIdx].fileUrl}
+                download={cvs[activeCvIdx].originalName || "Download_CV.pdf"}
+                target="_blank"
+                rel="noreferrer"
+                className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 shrink-0"
+              >
+                <FiDownload size={13} /> Download CV
+              </a>
+            )}
+          </div>
+
+          {/* Browser Default PDF Layout Workspace Viewport */}
+          <div className="flex-1 relative bg-slate-950">
+            {cvs && cvs[activeCvIdx] ? (
+              /* Using the <embed> tag with type="application/pdf" forces Chrome, Edge, 
+                and Safari to render their native browser PDF application layout view 
+                directly inside the component dimensions.
+              */
+              <embed
+                src={cvs[activeCvIdx].path || cvs[activeCvIdx].fileUrl}
+                type="application/pdf"
+                className="w-full h-full absolute inset-0 border-none bg-slate-950"
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center text-slate-600 font-mono text-xs">
+                NO_CV_CONTAINERS_LOADED_
               </div>
             )}
           </div>
         </div>
       );
     }
+    return null;
+  };
 
-    if (id === 'projects') {
-      return (
-        <div className="p-5 space-y-4 overflow-auto h-full">
-          {projects.length === 0 ? (
-            <div className="text-center text-gray-500 py-20 text-sm">No projects yet.</div>
-          ) : (
-            projects.map((p, i) => (
-              <div key={p._id || i} className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-blue-500/40 transition group">
-                {p.image && (
-                  <div className="h-40 bg-gray-800 overflow-hidden relative">
-                    <img src={p.image} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    {p.featured && <span className="absolute top-3 right-3 bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-lg">FEATURED</span>}
-                  </div>
-                )}
-                <div className="p-4">
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <h3 className="font-bold text-white text-base leading-snug">{p.title}</h3>
-                    {!p.image && p.featured && <span className="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded shrink-0">FEATURED</span>}
-                  </div>
-                  <p className="text-xs text-gray-400 leading-relaxed line-clamp-2 mb-3">{p.description}</p>
-                  {p.stack && <p className="text-xs text-blue-400 mb-3 font-medium">{p.stack}</p>}
-                  <div className="flex gap-2 flex-wrap">
-                    {p.liveLink && <a href={p.liveLink} target="_blank" rel="noreferrer" className="text-xs bg-blue-600/20 text-blue-400 px-3 py-1.5 rounded-full hover:bg-blue-600/30 transition font-medium">🔗 Live</a>}
-                    {p.githubLink && <a href={p.githubLink} target="_blank" rel="noreferrer" className="text-xs bg-white/10 text-gray-300 px-3 py-1.5 rounded-full hover:bg-white/15 transition font-medium">🐙 Code</a>}
-                  </div>
-                </div>
+  const currentWp = isMobile ? mobileWallpaper : wallpaper;
+
+  return (
+    <div
+      className={`fixed inset-0 select-none overflow-hidden transition-all duration-500 ${getBgClass(currentWp)}`}
+      style={getBgStyle(currentWp)}
+    >
+      <div
+        id="stars"
+        className="absolute inset-0 pointer-events-none z-0 opacity-50"
+      />
+
+      {/* ── MOBILE / TABLET VIEW LAYOUT ENGINE (SAMSUNG ONE UI COMPATIBLE) ── */}
+      {isMobile ? (
+        <div className="w-full h-full flex flex-col justify-between relative px-4 pb-6 pt-2 z-10">
+          {/* Top Virtualized Status Indicators */}
+          <div className="w-full flex justify-between items-center px-1 text-white/90 font-mono text-[11px] font-bold tracking-wider z-20">
+            <span>{time}</span>
+            <div className="flex items-center gap-2">
+              <span>5G</span>
+              <div className="w-5 h-2.5 border border-white/40 rounded-sm p-[1px] flex items-center">
+                <div className="w-full h-full bg-white/90 rounded-2xs" />
               </div>
-            ))
-          )}
-        </div>
-      );
-    }
-
-    if (id === 'skills') {
-      return (
-        <div className="p-5 space-y-5 overflow-auto h-full">
-          {skills.length === 0 ? (
-            <div className="text-center text-gray-500 py-16 text-sm">No skills yet.</div>
-          ) : (
-            skills.map((cat, i) => (
-              <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-4">
-                <p className="text-blue-400 text-[10px] font-bold uppercase tracking-widest mb-3">{cat.category}</p>
-                <div className="space-y-3">
-                  {(cat.skills || []).map((sk, j) => (
-                    <div key={j}>
-                      <div className="flex justify-between items-center mb-1.5">
-                        <span className="text-sm text-gray-200 font-medium">{sk.name}</span>
-                        <span className="text-xs text-gray-500 font-mono">{sk.percentage}%</span>
-                      </div>
-                      <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                        <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full transition-all duration-700 ease-out" style={{ width: `${sk.percentage}%` }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                {cat.tools?.length && (
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {cat.tools.map((t, k) => (
-                      <span key={k} className="text-[10px] bg-white/10 text-gray-300 px-2 py-1 rounded-full">{t}</span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))
-          )}
-        </div>
-      );
-    }
-
-    if (id === 'terminal') return (
-      <div className="bg-black/90 h-full flex flex-col font-mono">
-        <div className="flex items-center justify-between px-4 h-9 border-b border-gray-800 bg-black/80 shrink-0">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-500" /><div className="w-3 h-3 rounded-full bg-yellow-500" /><div className="w-3 h-3 rounded-full bg-green-500" />
-          </div>
-          <span className="text-gray-600 text-[10px]">RafiOS Terminal</span>
-        </div>
-        <div className="flex-1 p-4 text-xs overflow-auto">
-          <p className="text-green-400 mb-1">RafiOS Terminal v1.0</p>
-          <p className="text-gray-600 mb-4">Type 'help' for commands</p>
-          {terminalOutput.map((item, i) => (
-            <div key={i} className="mb-3">
-              <div className="flex gap-2"><span className="text-green-400">$</span><span className="text-white">{item.command}</span></div>
-              <div className="text-gray-400 whitespace-pre-wrap mt-1 pl-3 border-l border-gray-800">{item.output}</div>
             </div>
-          ))}
-        </div>
-        <div className="border-t border-gray-800 p-3 flex items-center gap-2 bg-black/60">
-          <span className="text-green-400 text-sm">$</span>
-          <input type="text" value={terminalInput} onChange={e => setTerminalInput(e.target.value)} onKeyDown={handleTerminalCommand}
-            className="flex-1 bg-transparent border-none outline-none text-white text-xs" placeholder="Type a command..." />
-        </div>
-      </div>
-    );
-
-    if (id === 'contact') return (
-      <div className="p-5 overflow-auto h-full">
-        <div className="text-center mb-6">
-          <h3 className="text-white font-bold text-lg">Let's Connect</h3>
-          <p className="text-gray-400 text-xs mt-1">I'd love to hear from you. Send me a message!</p>
-        </div>
-        <form onSubmit={handleContactSubmit} className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            {[{k:'name',p:'Full Name',t:'text'},{k:'email',p:'Email Address',t:'email'}].map(f => (
-              <input key={f.k} type={f.t} placeholder={f.p} value={formData[f.k]}
-                onChange={e => setFormData({...formData,[f.k]:e.target.value})}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white text-sm focus:border-blue-500 focus:outline-none transition" required />
-            ))}
           </div>
-          <input type="text" placeholder="Subject" value={formData.subject} onChange={e => setFormData({...formData,subject:e.target.value})}
-            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white text-sm focus:border-blue-500 focus:outline-none transition" required />
-          <textarea placeholder="Your Message..." rows="4" value={formData.message}
-            onChange={e => setFormData({...formData,message:e.target.value})}
-            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white text-sm focus:border-blue-500 focus:outline-none transition resize-none" required />
-          <button type="submit" disabled={sending}
-            className="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl font-semibold text-white text-sm hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25">
-            {sending ? 'Sending...' : <><FiSend size={14} /> Send Message</>}
-          </button>
-        </form>
-      </div>
-    );
 
-    if (id === 'gallery') return <Gallery />;
-    if (id === 'music') return <MusicPlayer />;
+          {/* Home Screen Central Widget Clusters */}
+          {!activeApp && (
+            <div className="w-full flex flex-col items-center mt-6 text-center animate-fade-in select-none">
+              <h1 className="text-4xl font-light text-white tracking-wide drop-shadow-md">
+                {time}
+              </h1>
+              <p className="text-xs text-white/70 font-medium mt-0.5">
+                {currentDate}
+              </p>
+              <div className="mt-3 px-3 py-1 bg-black/20 backdrop-blur-md rounded-full border border-white/5 flex items-center gap-1.5 text-[10px] text-white/90 font-mono">
+                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+                <span>Book a free Meet/Call</span>
+              </div>
+            </div>
+          )}
 
-    if (id === 'cv') {
-      const activeCv = cvs[activeCvIdx] || cvs[0];
-      return (
-        <div className="flex flex-col h-full">
-          {cvs.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center text-gray-500 text-sm">No CV available.</div>
-          ) : (
-            <div className="p-5 space-y-4 overflow-auto">
-              <div className="text-center mb-2">
-                <p className="text-white font-semibold text-sm">📄 My CV ({cvs.length})</p>
-              </div>
-              <div className="flex justify-center">
-                <div className="relative w-full h-[500px] border border-gray-700 rounded-lg flex items-center justify-center bg-black/40 overflow-hidden">
-                  {activeCv?.path ? (
-                    <>
-                      <iframe src={activeCv.path} className="w-full h-full border-none" title="CV Preview" />
-                      <div className="text-white text-center absolute bottom-4 left-0 right-0">
-                        <a href={activeCv.path} target="_blank" rel="noreferrer" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-xs font-semibold shadow-lg">View in New Tab</a>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-gray-500">CV not available</div>
-                  )}
-                </div>
-              </div>
-              <div className="space-y-2">
-                {cvs.map((cv, i) => (
-                  <button key={i} onClick={() => setActiveCvIdx(i)}
-                    className={`w-full flex items-center justify-between border rounded-2xl p-3 text-left transition ${activeCvIdx === i ? 'bg-blue-600/10 border-blue-500/50' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}>
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${activeCvIdx === i ? 'bg-blue-500/20 text-blue-400' : 'bg-red-500/20 text-red-400'}`}>📄</div>
-                      <div>
-                        <p className="text-white text-sm font-medium truncate max-w-[200px]">{cv.originalName || fmt(cv.path)}</p>
-                        <p className="text-gray-500 text-xs">PDF</p>
-                      </div>
+          {/* Central Context Responsive Grid Layout */}
+          {!activeApp && (
+            <div className="w-full bg-black/10 backdrop-blur-md border border-white/5 rounded-3xl p-2 grid grid-cols-3 gap-y-5 gap-x-2 my-auto max-h-[auto] overflow-y-auto custom-scrollbar">
+              {apps
+                .filter((a) => !a.dock)
+                .map((app) => (
+                  <button
+                    key={app.id}
+                    onClick={() => handleAppLaunch(app)}
+                    className="flex flex-col items-center group active:scale-95 transition-transform"
+                  >
+                    <div
+                      className={`w-16 h-16 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br ${app.color} shadow-lg flex items-center justify-center border border-white/10 group-hover:border-white/20 shadow-black/30`}
+                    >
+                      {app.icon}
                     </div>
-                    <span className={`text-xs px-3 py-1.5 rounded-full transition font-semibold ${activeCvIdx === i ? 'bg-blue-500 text-white' : 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30'}`}>
-                      {activeCvIdx === i ? 'Viewing' : 'Select'}
+                    <span className="text-[10px] sm:text-xs text-white font-medium mt-1.5 text-center truncate w-full drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.8)]">
+                      {app.label}
                     </span>
                   </button>
                 ))}
+            </div>
+          )}
+
+          {/* Screen Content Modal Portals */}
+          {activeApp && (
+            <div className="absolute inset-0 bg-white z-40 flex flex-col animate-slide-up">
+              <div className="h-12 border-b border-white/15 bg-slate-900/80 backdrop-blur-xl flex items-center justify-between px-3 shrink-0">
+                <button
+                  onClick={() => setActiveApp(null)}
+                  className="p-2 text-white text-lg active:opacity-50"
+                >
+                  <FiChevronLeft />
+                </button>
+                <span className="text-xs font-bold font-mono tracking-widest uppercase text-white/90">
+                  {apps.find((a) => a.id === activeApp)?.label}
+                </span>
+                <button
+                  onClick={() => setActiveApp(null)}
+                  className="p-2 text-slate-400 hover:text-white transition-colors"
+                >
+                  <FiX size={14} />
+                </button>
+              </div>
+              <div className="flex-1 overflow-hidden relative">
+                {renderContent(activeApp)}
               </div>
             </div>
           )}
-        </div>
-      );
-    }
-  };
 
-  const openApp = (app) => {
-    if (isMobile) setActiveApp(app);
-    else openWindow(app.id, app.label, app.width, app.height);
-  };
-
-  // ── MOBILE layout ─────────────────────────────────────────────────
-  if (isMobile) {
-    const wp = mobileWallpaper;
-    return (
-      <div className={`fixed inset-0 overflow-hidden ${getBgClass(wp)}`} style={getBgStyle(wp)}>
-        <div id="stars" className="absolute inset-0 pointer-events-none" />
-
-        {/* Status bar */}
-        <div className="absolute top-0 left-0 right-0 h-12 flex items-center justify-between px-6 z-50">
-          <span className="text-white text-xs font-semibold drop-shadow-md">{time}</span>
-          <div className="absolute left-1/2 -translate-x-1/2 top-2 w-28 h-8 bg-black rounded-full flex items-center justify-center shadow-xl border border-white/10">
-            <span className="text-white/60 text-[9px] tracking-widest font-medium">RafiOS</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="flex gap-0.5 items-end h-3">
-              {[2,3,4,4,3].map((h,i) => <div key={i} className="w-0.5 bg-white rounded-sm shadow-sm" style={{height:`${h*3}px`}} />)}
-            </div>
-            <svg className="w-4 h-3 text-white" fill="currentColor" viewBox="0 0 24 12"><rect x="0" y="0" width="20" height="12" rx="2" fill="none" stroke="currentColor" strokeWidth="1.5"/><rect x="20.5" y="3.5" width="2" height="5" rx="1" fill="currentColor"/><rect x="1.5" y="1.5" width="14" height="9" rx="1" fill="currentColor"/></svg>
-          </div>
-        </div>
-
-        {activeApp ? (
-          /* App open — full screen */
-          <div className="absolute inset-0 z-40 flex flex-col" style={{ paddingTop: '48px', paddingBottom: '34px' }}>
-            {/* App header */}
-            <div className="bg-black/40 backdrop-blur-2xl border-b border-white/10 flex items-center px-4 py-3 shrink-0">
-              <button onClick={() => setActiveApp(null)}
-                className="flex items-center gap-1 text-blue-400 text-sm font-semibold mr-3 active:opacity-70 transition">
-                <FiChevronLeft size={18} /> Home
+          {/* Dynamic Bottom Launch Dock */}
+          
+            <div className="w-full bg-black/20 backdrop-blur-xl border-white/10 rounded-2xl p-2 grid grid gap-3 shadow-xl max-w-md mx-auto md:hidden">
+              <button
+                className="flex justify-center items-center active:scale-90 transition-transform" >
+                <div
+                  className={`w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br shadow-md flex items-center justify-center border border-white/10`}
+                >
+                  <FiMenu className="w-16 h-16 text-white" />
+                </div>
               </button>
-              <span className="text-white font-semibold text-sm flex-1 text-center pr-8">{activeApp.label}</span>
+                
             </div>
-            <div className="flex-1 overflow-auto bg-[#0d0d0f]/95 backdrop-blur-xl">
-              {renderContent(activeApp.id)}
-            </div>
-          </div>
-        ) : (
-          <>
-            {/* Home screen */}
-            <div className="absolute inset-0 flex flex-col" style={{ paddingTop: '56px', paddingBottom: '100px' }}>
-              {/* Greeting */}
-              <div className="px-6 mb-6">
-                <p className="text-white/50 text-[10px] uppercase tracking-[0.2em] font-medium">Welcome</p>
-                <h1 className="text-white text-2xl font-bold mt-1">{bio?.name || 'Rafi Ullah'}</h1>
-                <p className="text-blue-400 text-xs font-medium mt-0.5">{bio?.title || 'Full Stack Developer'}</p>
-                <p className="text-white/40 text-[10px] mt-0.5">{statusMsg}</p>
-              </div>
-
-              {/* App grid — 4 cols with premium spacing */}
-              <div className="flex-1 overflow-auto px-5">
-                <div className="grid grid-cols-4 gap-x-5 gap-y-7">
-                  {apps.map(app => (
-                    <button key={app.id} onClick={() => openApp(app)}
-                      className="flex flex-col items-center gap-2 active:scale-90 transition-transform duration-150 w-full group">
-                      <div className={`w-16 h-16 bg-gradient-to-br ${app.color} rounded-[22px] flex items-center justify-center text-2xl shadow-lg shadow-black/40 group-hover:scale-110 group-hover:shadow-xl transition-all`}>
-                        {app.icon}
-                      </div>
-                      <span className="text-white/80 text-[10px] font-medium text-center leading-tight">{app.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Quick stats strip */}
-              <div className="px-6 mb-4">
-                <div className="flex justify-around bg-white/5 border border-white/10 rounded-2xl py-3 backdrop-blur-xl">
-                  {[
-                    { label: 'Projects', value: stats.projects },
-                    { label: 'Hours', value: stats.hours },
-                    { label: 'Clients', value: stats.clients },
-                  ].map((s, i) => (
-                    <div key={i} className="text-center">
-                      <p className="text-white font-bold text-base">{s.value}</p>
-                      <p className="text-gray-400 text-[9px] uppercase tracking-wider">{s.label}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Dock */}
-            <div className="absolute bottom-6 left-4 right-4 z-50">
-              <div className="bg-white/10 backdrop-blur-2xl rounded-[28px] px-4 py-3 flex justify-around border border-white/20 shadow-2xl">
-                {apps.slice(0, 4).map(app => (
-                  <button key={app.id} onClick={() => openApp(app)}
-                    className="flex flex-col items-center gap-1 active:scale-90 transition-transform duration-100">
-                    <div className={`w-12 h-12 bg-gradient-to-br ${app.color} rounded-[14px] flex items-center justify-center text-xl shadow-md`}>
-                      {app.icon}
-                    </div>
-                  </button>
-                ))}
-                <button onClick={() => router.push('/admin/login')} className="flex flex-col items-center gap-1">
-                  <div className="w-12 h-12 bg-gray-700/50 rounded-[14px] flex items-center justify-center text-lg shadow-md">
-                    ⚙️
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            {/* Home indicator */}
-            <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-28 h-1 bg-white/30 rounded-full" />
-          </>
-        )}
-      </div>
-    );
-  }
-
-  // ── DESKTOP layout ─────────────────────────────────────────────────
-  const wp = wallpaper;
-  return (
-    <div className={`fixed inset-0 overflow-hidden ${getBgClass(wp)}`} style={getBgStyle(wp)}>
-      <div id="stars" className="absolute inset-0 pointer-events-none" />
-
-      {/* Menu Bar */}
-      <div className="absolute top-0 left-0 right-0 h-10 bg-black/50 backdrop-blur-xl flex items-center px-4 gap-3 z-50 border-b border-white/10">
-        <span className="text-blue-400 font-bold text-sm tracking-tight">RafiOS</span>
-        {apps.slice(0, 5).map(app => (
-          <button key={app.id} onClick={() => openApp(app)} className="text-white/70 hover:text-white text-xs px-2 py-0.5 rounded hover:bg-white/10 transition hidden sm:block">
-            {app.label}
-          </button>
-        ))}
-        <div className="flex-1" />
-        <button onClick={() => router.push('/admin/login')} className="text-white/70 hover:text-white text-xs px-2 py-0.5 rounded hover:bg-white/10 transition flex items-center gap-1">
-          <FiUser size={10} /> Admin
-        </button>
-        <span className="text-white/50 text-xs">{time}</span>
-      </div>
-
-      {/* Desktop Icons */}
-      <div className="absolute top-12 left-3 flex flex-col gap-1.5">
-        {apps.map(app => (
-          <div key={app.id} className="w-20 flex flex-col items-center gap-1 cursor-pointer hover:bg-white/10 rounded-2xl p-2 transition group"
-            onDoubleClick={() => openApp(app)}>
-            <div className={`w-12 h-12 bg-gradient-to-br ${app.color} rounded-2xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-lg`}>{app.icon}</div>
-            <span className="text-white/70 text-[10px] text-center leading-tight">{app.label}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Windows */}
-      {Object.values(windows).filter(w => w.visible).map(win => (
-        <div key={win.id} className="fixed bg-[#1a1f2e]/95 backdrop-blur-xl rounded-2xl border border-white/15 flex flex-col shadow-2xl"
-          style={{ left: win.x, top: win.y, width: win.width, height: win.height, zIndex: win.zIndex }}
-          onMouseDown={() => focusWindow(win.id)}>
-          <div className="h-10 bg-[#14192a] rounded-t-2xl flex items-center px-3 gap-2 border-b border-white/10 cursor-grab active:cursor-grabbing select-none shrink-0"
-            onMouseDown={e => { if (e.button !== 0 || e.target.tagName === 'BUTTON') return; e.preventDefault(); startDrag(e.clientX, e.clientY, win.id); }}
-            onTouchStart={e => { if (e.target.tagName === 'BUTTON') return; startDrag(e.touches[0].clientX, e.touches[0].clientY, win.id); }}>
-            <button onClick={() => closeWindow(win.id)} className="w-3.5 h-3.5 rounded-full bg-red-500 hover:bg-red-400 transition shrink-0" />
-            <button className="w-3.5 h-3.5 rounded-full bg-yellow-500 shrink-0" />
-            <button className="w-3.5 h-3.5 rounded-full bg-green-500 shrink-0" />
-            <span className="text-white/60 text-xs ml-2 font-medium truncate">{win.title}</span>
-          </div>
-          <div className="flex-1 overflow-auto">{renderContent(win.id)}</div>
+          
         </div>
-      ))}
+      ) : (
+        /* ── WORKSPACE DESKTOP PERFORMANCE PLATFORM LAYOUT ── */
+        <div className="w-full h-full relative flex flex-col justify-between p-3 z-10">
+          {/* Top Control Core Header Bar */}
+          <div className="w-full h-8 bg-black/20 backdrop-blur-md rounded-full border border-white/5 flex items-center justify-between px-5 text-[11px] text-slate-300 z-30 shrink-0 shadow-sm">
+            <span className="font-bold text-white tracking-widest font-mono">
+              Rafi Ullah
+            </span>
+            <div className="flex items-center justify-between gap-[260px] max-w-[60%] ">
+              <span className="font-mono text-cyan-400 bg-cyan-950/30 border border-cyan-800/20 px-3 py-0.5 rounded-md text-[10px]  truncate max-w-md">
+                {statusMsg}
+              </span>
+              <span className="font-medium text-white/90 font-mono tracking-wide shrink-0">
+                {currentDate} · {time}
+              </span>
+            </div>
+          </div>
 
-      {/* Dock */}
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-xl rounded-2xl px-2 py-1.5 flex gap-1 border border-white/20 z-50 max-w-[calc(100vw-16px)] overflow-x-auto">
-        {apps.map(app => (
-          <button key={app.id} onClick={() => openApp(app)}
-            className={`w-11 h-11 bg-gradient-to-br ${app.color} rounded-xl flex items-center justify-center text-xl cursor-pointer hover:scale-110 transition-all duration-200 relative group shrink-0 shadow-md`}>
-            {app.icon}
-            <span className="absolute -top-7 left-1/2 -translate-x-1/2 bg-black/80 text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none shadow-lg">{app.label}</span>
-          </button>
-        ))}
-      </div>
+          {/* Main Bottom Panel - Centered Layout with Two Lines */}
+          <div className="flex-1 w-[65vw] m-8 p-4 flex flex-col items-center justify-end gap-6 mx-auto">
+
+            {/* LINE 1: Social Icons (Top Line) */}
+            <div className="flex items-center justify-center gap-6">
+              {apps
+                .filter((app) => app.socialIcon) // Sirf wo apps filter hongi jinki socialIcon maujood hai
+                .map((app) => (
+                  <a
+                    key={`social-${app.id}`}
+                    href={app.socialUrl || "#"}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-10 h-10 rounded-xl bg-zinc-900/80 border border-white/10 flex items-center justify-center text-white/90 hover:text-white hover:bg-zinc-800 hover:-translate-y-1 transition-all duration-200 shadow-md shadow-black/20"
+                    title={app.label}
+                  >
+                    <div className="w-5 h-5">
+                      {app.socialIcon}
+                    </div>
+                  </a>
+                ))}
+            </div>
+
+            {/* LINE 2: App Icons (Bottom Line) */}
+            <div className="flex flex-wrap items-center justify-center gap-16">
+              {apps.map((app) => (
+                <button
+                  key={app.id}
+                  onClick={() => handleAppLaunch(app)}
+                  className="w-22 flex flex-col items-center group transition-transform duration-200 hover:-translate-y-0.5"
+                >
+                  {/* Main App Container */}
+                  <div
+                    className={`w-16 h-16 rounded-xl bg-gradient-to-br ${app.color} shadow-md flex items-center justify-center border border-white/10 group-hover:scale-105 transition-all duration-200 shadow-black/30`}
+                  >
+                    {app.icon}
+                  </div>
+
+                  {/* App Label */}
+                  <span className="text-[10px] text-white/90 font-mono tracking-wide mt-1.5 text-center truncate max-w-full bg-black/40 backdrop-blur-xs px-1.5 py-0.5 rounded border border-white/5 shadow-sm">
+                    {app.label}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+          </div>
+
+          {/* Desktop Multi-Window Task Render Pipeline */}
+          {Object.values(windows).map((win) => {
+            if (!win.visible) return null;
+            return (
+              <div
+                key={win.id}
+                style={{
+                  zIndex: win.zIndex,
+                  left: win.x,
+                  top: win.y,
+                  width: win.width,
+                  height: win.height,
+                }}
+                className="absolute bg-slate-950/70 border border-white/10 rounded-xl shadow-2xl flex flex-col backdrop-blur-xl overflow-hidden shadow-black/80 ring-1 ring-white/5"
+                onClick={() => focusWindow(win.id)}
+              >
+                {/* Drag Control Header Node bar */}
+                <div
+                  onMouseDown={(e) => startDrag(e.clientX, e.clientY, win.id)}
+                  onTouchStart={(e) =>
+                    startDrag(
+                      e.touches[0].clientX,
+                      e.touches[0].clientY,
+                      win.id,
+                    )
+                  }
+                  className="h-9 border-b border-white/5 bg-slate-900/60 flex items-center justify-between px-3 cursor-move select-none shrink-0"
+                >
+                  <span className="text-[11px] font-mono font-bold text-slate-300 tracking-wider flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+                    {win.title}
+                  </span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      closeWindow(win.id);
+                    }}
+                    className="w-5 h-5 rounded-md bg-white/5 hover:bg-rose-600/30 text-slate-400 hover:text-rose-400 flex items-center justify-center transition-colors border border-white/5"
+                  >
+                    <FiX size={11} />
+                  </button>
+                </div>
+                <div className="flex-1 overflow-hidden relative bg-slate-950/30">
+                  {renderContent(win.id)}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
+
