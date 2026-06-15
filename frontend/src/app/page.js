@@ -99,7 +99,7 @@ const apps = [
     id: "about",
     label: "About Me",
     icon: <FiUser className="w-5 h-5 text-white" />,
-    // color: "from-green-300 to-green-700",
+    color: "from-green-300 to-green-700",
     width: 520,
     height: 500,
     dock: false,
@@ -914,226 +914,217 @@ export default function HomePage() {
 
   return (
     <div
-      className={`fixed inset-0 select-none overflow-hidden transition-all duration-500 ${getBgClass(currentWp)}`}
-      style={getBgStyle(currentWp)}
-    >
-      <div
-        id="stars"
-        className="absolute inset-0 pointer-events-none z-0 opacity-50"
-      />
+  className={`fixed inset-0 select-none overflow-hidden transition-all duration-500 ${getBgClass(currentWp)}`}
+  style={getBgStyle(currentWp)}
+>
+  <div
+    id="stars"
+    className="absolute inset-0 pointer-events-none z-0 opacity-50"
+  />
 
-      {/* ── MOBILE / TABLET VIEW LAYOUT ENGINE (SAMSUNG ONE UI COMPATIBLE) ── */}
-      {isMobile ? (
-        <div className="w-full h-full flex flex-col justify-between relative px-4 pb-6 pt-2 z-10">
-          {/* Top Virtualized Status Indicators */}
-          <div className="w-full flex justify-between items-center px-1 text-white/90 font-mono text-[11px] font-bold tracking-wider z-20">
-            <span>{time}</span>
-            <div className="flex items-center gap-2">
-              <span>5G</span>
-              <div className="w-5 h-2.5 border border-white/40 rounded-sm p-[1px] flex items-center">
-                <div className="w-full h-full bg-white/90 rounded-2xs" />
-              </div>
-            </div>
+  {/* ── MOBILE / TABLET VIEW LAYOUT ENGINE (SAMSUNG ONE UI COMPATIBLE) ── */}
+  {isMobile ? (
+    <div className="w-full h-full flex flex-col justify-between relative px-4 pb-6 pt-2 z-10">
+      {/* Top Virtualized Status Indicators */}
+      <div className="w-full flex justify-between items-center px-1 text-white/90 font-mono text-[11px] font-bold tracking-wider z-20">
+        <span>{time}</span>
+        <div className="flex items-center gap-2">
+          <span>5G</span>
+          <div className="w-5 h-2.5 border border-white/40 rounded-sm p-[1px] flex items-center">
+            <div className="w-full h-full bg-white/90 rounded-2xs" />
           </div>
-
-          {/* Home Screen Central Widget Clusters */}
-          {!activeApp && (
-            <div className="w-full flex flex-col items-center mt-6 text-center animate-fade-in select-none">
-              <h1 className="text-4xl font-light text-white tracking-wide drop-shadow-md">
-                {time}
-              </h1>
-              <p className="text-xs text-white/70 font-medium mt-0.5">
-                {currentDate}
-              </p>
-              <div className="mt-3 px-3 py-1 bg-black/20 backdrop-blur-md rounded-full border border-white/5 flex items-center gap-1.5 text-[10px] text-white/90 font-mono">
-                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
-                <span>Book a free Meet/Call</span>
-              </div>
-            </div>
-          )}
-
-          {/* Central Context Responsive Grid Layout */}
-          {!activeApp && (
-            <div className="w-full bg-black/10 backdrop-blur-md border border-white/5 rounded-3xl p-2 grid grid-cols-3 gap-y-5 gap-x-2 my-auto max-h-[auto] overflow-y-auto custom-scrollbar">
-              {apps
-                .filter((a) => !a.dock)
-                .map((app) => (
-                  <button
-                    key={app.id}
-                    onClick={() => handleAppLaunch(app)}
-                    className="flex flex-col items-center group active:scale-95 transition-transform"
-                  >
-                    <div
-                      className={`w-16 h-16 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br ${app.color} shadow-lg flex items-center justify-center border border-white/10 group-hover:border-white/20 shadow-black/30`}
-                    >
-                      {app.icon}
-                    </div>
-                    <span className="text-[10px] sm:text-xs text-white font-medium mt-1.5 text-center truncate w-full drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.8)]">
-                      {app.label}
-                    </span>
-                  </button>
-                ))}
-            </div>
-          )}
-
-          {/* Screen Content Modal Portals */}
-          {activeApp && (
-            <div className="absolute inset-0 bg-white z-40 flex flex-col animate-slide-up">
-              <div className="h-12 border-b border-white/15 bg-slate-900/80 backdrop-blur-xl flex items-center justify-between px-3 shrink-0">
-                <button
-                  onClick={() => setActiveApp(null)}
-                  className="p-2 text-white text-lg active:opacity-50"
-                >
-                  <FiChevronLeft />
-                </button>
-                <span className="text-xs font-bold font-mono tracking-widest uppercase text-white/90">
-                  {apps.find((a) => a.id === activeApp)?.label}
-                </span>
-                <button
-                  onClick={() => setActiveApp(null)}
-                  className="p-2 text-slate-400 hover:text-white transition-colors"
-                >
-                  <FiX size={14} />
-                </button>
-              </div>
-              <div className="flex-1 overflow-hidden relative">
-                {renderContent(activeApp)}
-              </div>
-            </div>
-          )}
-
-          {/* Dynamic Bottom Launch Dock */}
-          
-            <div className="w-full bg-black/20 backdrop-blur-xl border-white/10 rounded-2xl p-2 grid grid gap-3 shadow-xl max-w-md mx-auto md:hidden">
-              <button
-                className="flex justify-center items-center active:scale-90 transition-transform" >
-                <div
-                  className={`w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br shadow-md flex items-center justify-center border border-white/10`}
-                >
-                  <FiMenu className="w-16 h-16 text-white" />
-                </div>
-              </button>
-                
-            </div>
-          
         </div>
-      ) : (
-        /* ── WORKSPACE DESKTOP PERFORMANCE PLATFORM LAYOUT ── */
-        <div className="w-full h-full relative flex flex-col justify-between p-3 z-10">
-          {/* Top Control Core Header Bar */}
-          <div className="w-full h-8 bg-black/20 backdrop-blur-md rounded-full border border-white/5 flex items-center justify-between px-5 text-[11px] text-slate-300 z-30 shrink-0 shadow-sm">
-            <span className="font-bold text-white tracking-widest font-mono">
-              Rafi Ullah
-            </span>
-            <div className="flex items-center justify-between gap-[260px] max-w-[60%] ">
-              <span className="font-mono text-cyan-400 bg-cyan-950/30 border border-cyan-800/20 px-3 py-0.5 rounded-md text-[10px]  truncate max-w-md">
-                {statusMsg}
-              </span>
-              <span className="font-medium text-white/90 font-mono tracking-wide shrink-0">
-                {currentDate} · {time}
-              </span>
-            </div>
+      </div>
+
+      {/* Home Screen Central Widget Clusters */}
+      {!activeApp && (
+        <div className="w-full flex flex-col items-center mt-6 text-center animate-fade-in select-none">
+          <h1 className="text-4xl font-light text-white tracking-wide drop-shadow-md">
+            {time}
+          </h1>
+          <p className="text-xs text-white/70 font-medium mt-0.5">
+            {currentDate}
+          </p>
+          <div className="mt-3 px-3 py-1 bg-black/20 backdrop-blur-md rounded-full border border-white/5 flex items-center gap-1.5 text-[10px] text-white/90 font-mono">
+            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+            <span>Book a free Meet/Call</span>
           </div>
-
-          {/* Main Bottom Panel - Centered Layout with Two Lines */}
-          <div className="flex-1 w-[65vw] m-8 p-4 flex flex-col items-center justify-end gap-6 mx-auto">
-
-            {/* LINE 1: Social Icons (Top Line) */}
-            <div className="flex items-center justify-center gap-6">
-              {apps
-                .filter((app) => app.socialIcon) // Sirf wo apps filter hongi jinki socialIcon maujood hai
-                .map((app) => (
-                  <a
-                    key={`social-${app.id}`}
-                    href={app.socialUrl || "#"}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-10 h-10 rounded-xl bg-zinc-900/80 border border-white/10 flex items-center justify-center text-white/90 hover:text-white hover:bg-zinc-800 hover:-translate-y-1 transition-all duration-200 shadow-md shadow-black/20"
-                    title={app.label}
-                  >
-                    <div className="w-5 h-5">
-                      {app.socialIcon}
-                    </div>
-                  </a>
-                ))}
-            </div>
-
-            {/* LINE 2: App Icons (Bottom Line) */}
-            <div className="flex flex-wrap items-center justify-center gap-16">
-              {apps.map((app) => (
-                <button
-                  key={app.id}
-                  onClick={() => handleAppLaunch(app)}
-                  className="w-22 flex flex-col items-center group transition-transform duration-200 hover:-translate-y-0.5"
-                >
-                  {/* Main App Container */}
-                  <div
-                    className={`w-16 h-16 rounded-xl bg-gradient-to-br ${app.color} shadow-md flex items-center justify-center border border-white/10 group-hover:scale-105 transition-all duration-200 shadow-black/30`}
-                  >
-                    {app.icon}
-                  </div>
-
-                  {/* App Label */}
-                  <span className="text-[10px] text-white/90 font-mono tracking-wide mt-1.5 text-center truncate max-w-full bg-black/40 backdrop-blur-xs px-1.5 py-0.5 rounded border border-white/5 shadow-sm">
-                    {app.label}
-                  </span>
-                </button>
-              ))}
-            </div>
-
-          </div>
-
-          {/* Desktop Multi-Window Task Render Pipeline */}
-          {Object.values(windows).map((win) => {
-            if (!win.visible) return null;
-            return (
-              <div
-                key={win.id}
-                style={{
-                  zIndex: win.zIndex,
-                  left: win.x,
-                  top: win.y,
-                  width: win.width,
-                  height: win.height,
-                }}
-                className="absolute bg-slate-950/70 border border-white/10 rounded-xl shadow-2xl flex flex-col backdrop-blur-xl overflow-hidden shadow-black/80 ring-1 ring-white/5"
-                onClick={() => focusWindow(win.id)}
-              >
-                {/* Drag Control Header Node bar */}
-                <div
-                  onMouseDown={(e) => startDrag(e.clientX, e.clientY, win.id)}
-                  onTouchStart={(e) =>
-                    startDrag(
-                      e.touches[0].clientX,
-                      e.touches[0].clientY,
-                      win.id,
-                    )
-                  }
-                  className="h-9 border-b border-white/5 bg-slate-900/60 flex items-center justify-between px-3 cursor-move select-none shrink-0"
-                >
-                  <span className="text-[11px] font-mono font-bold text-slate-300 tracking-wider flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-                    {win.title}
-                  </span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      closeWindow(win.id);
-                    }}
-                    className="w-5 h-5 rounded-md bg-white/5 hover:bg-rose-600/30 text-slate-400 hover:text-rose-400 flex items-center justify-center transition-colors border border-white/5"
-                  >
-                    <FiX size={11} />
-                  </button>
-                </div>
-                <div className="flex-1 overflow-hidden relative bg-slate-950/30">
-                  {renderContent(win.id)}
-                </div>
-              </div>
-            );
-          })}
         </div>
       )}
+
+      {/* Central Context Responsive Grid Layout - REMOVED GRAY BG CARD HERE */}
+      {!activeApp && (
+        <div className="w-full grid grid-cols-3 gap-y-6 gap-x-2 my-auto max-h-[auto] overflow-y-auto custom-scrollbar">
+          {apps
+            .filter((a) => !a.dock)
+            .map((app) => (
+              <button
+                key={app.id}
+                onClick={() => handleAppLaunch(app)}
+                className="flex flex-col items-center group active:scale-95 transition-transform"
+              >
+                <div
+                  className={`w-16 h-16 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br ${app.color} shadow-lg flex items-center justify-center border border-white/10 group-hover:border-white/20 shadow-black/30`}
+                >
+                  {app.icon}
+                </div>
+                <span className="text-[10px] sm:text-xs text-white font-medium mt-1.5 text-center truncate w-full drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.8)]">
+                  {app.label}
+                </span>
+              </button>
+            ))}
+        </div>
+      )}
+
+      {/* Screen Content Modal Portals */}
+      {activeApp && (
+        <div className="absolute inset-0 bg-white z-40 flex flex-col animate-slide-up">
+          <div className="h-12 border-b border-white/15 bg-slate-900/80 backdrop-blur-xl flex items-center justify-between px-3 shrink-0">
+            <button
+              onClick={() => setActiveApp(null)}
+              className="p-2 text-white text-lg active:opacity-50"
+            >
+              <FiChevronLeft />
+            </button>
+            <span className="text-xs font-bold font-mono tracking-widest uppercase text-white/90">
+              {apps.find((a) => a.id === activeApp)?.label}
+            </span>
+            <button
+              onClick={() => setActiveApp(null)}
+              className="p-2 text-slate-400 hover:text-white transition-colors"
+            >
+              <FiX size={14} />
+            </button>
+          </div>
+          <div className="flex-1 overflow-hidden relative">
+            {renderContent(activeApp)}
+          </div>
+        </div>
+      )}
+
+      {/* Dynamic Bottom Launch Dock Area - REMOVED GRAY BG CARD HERE */}
+      <div className="w-full flex justify-center items-center max-w-md mx-auto md:hidden">
+        <button className="flex justify-center items-center active:scale-90 transition-transform">
+          <div
+            className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-white/10 border border-white/20 backdrop-blur-md shadow-md flex items-center justify-center"
+          >
+            <FiMenu className="w-6 h-6 text-white" />
+          </div>
+        </button>
+      </div>
+      
     </div>
+  ) : (
+    /* ── WORKSPACE DESKTOP PERFORMANCE PLATFORM LAYOUT ── */
+    <div className="w-full h-full relative flex flex-col justify-between p-3 z-10">
+      {/* Top Control Core Header Bar */}
+      <div className="w-full h-8 bg-black/20 backdrop-blur-md rounded-full border border-white/5 flex items-center justify-between px-5 text-[11px] text-slate-300 z-30 shrink-0 shadow-sm">
+        <span className="font-bold text-white tracking-widest font-mono">
+          Rafi Ullah
+        </span>
+        <div className="flex items-center justify-between gap-[260px] max-w-[60%] ">
+          <span className="font-mono text-cyan-400 bg-cyan-950/30 border border-cyan-800/20 px-3 py-0.5 rounded-md text-[10px] truncate max-w-md">
+            {statusMsg}
+          </span>
+          <span className="font-medium text-white/90 font-mono tracking-wide shrink-0">
+            {currentDate} · {time}
+          </span>
+        </div>
+      </div>
+
+      {/* Main Bottom Panel - Centered Layout with Two Lines */}
+      <div className="flex-1 w-[65vw] m-8 p-4 flex flex-col items-center justify-end gap-6 mx-auto">
+
+        {/* LINE 1: Social Icons (Top Line) */}
+        <div className="flex items-center justify-center gap-6">
+          {apps
+            .filter((app) => app.socialIcon)
+            .map((app) => (
+              <a
+                key={`social-${app.id}`}
+                href={app.socialUrl || "#"}
+                target="_blank"
+                rel="noreferrer"
+                className="w-10 h-10 rounded-xl bg-zinc-900/80 border border-white/10 flex items-center justify-center text-white/90 hover:text-white hover:bg-zinc-800 hover:-translate-y-1 transition-all duration-200 shadow-md shadow-black/20"
+                title={app.label}
+              >
+                <div className="w-5 h-5">
+                  {app.socialIcon}
+                </div>
+              </a>
+            ))}
+        </div>
+
+        {/* LINE 2: App Icons (Bottom Line) */}
+        <div className="flex flex-wrap items-center justify-center gap-16">
+          {apps.map((app) => (
+            <button
+              key={app.id}
+              onClick={() => handleAppLaunch(app)}
+              className="w-22 flex flex-col items-center group transition-transform duration-200 hover:-translate-y-0.5"
+            >
+              {/* Main App Container */}
+              <div
+                className={`w-16 h-16 rounded-xl bg-gradient-to-br ${app.color} shadow-md flex items-center justify-center border border-white/10 group-hover:scale-105 transition-all duration-200 shadow-black/30`}
+              >
+                {app.icon}
+              </div>
+
+              {/* App Label */}
+              <span className="text-[10px] text-white/90 font-mono tracking-wide mt-1.5 text-center truncate max-w-full bg-black/40 backdrop-blur-xs px-1.5 py-0.5 rounded border border-white/5 shadow-sm">
+                {app.label}
+              </span>
+            </button>
+          ))}
+        </div>
+
+      </div>
+
+      {/* Desktop Multi-Window Task Render Pipeline */}
+      {Object.values(windows).map((win) => {
+        if (!win.visible) return null;
+        return (
+          <div
+            key={win.id}
+            style={{
+              zIndex: win.zIndex,
+              left: win.x,
+              top: win.y,
+              width: win.width,
+              height: win.height,
+            }}
+            className="absolute bg-slate-950/70 border border-white/10 rounded-xl shadow-2xl flex flex-col backdrop-blur-xl overflow-hidden shadow-black/80 ring-1 ring-white/5"
+            onClick={() => focusWindow(win.id)}
+          >
+            {/* Drag Control Header Node bar */}
+            <div
+              onMouseDown={(e) => startDrag(e.clientX, e.clientY, win.id)}
+              onTransitionEnd={(e) => e.stopPropagation()}
+              className="h-9 border-b border-white/5 bg-slate-900/60 flex items-center justify-between px-3 cursor-move select-none shrink-0"
+            >
+              <span className="text-[11px] font-mono font-bold text-slate-300 tracking-wider flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+                {win.title}
+              </span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  closeWindow(win.id);
+                }}
+                className="w-5 h-5 rounded-md bg-white/5 hover:bg-rose-600/30 text-slate-400 hover:text-rose-400 flex items-center justify-center transition-colors border border-white/5"
+              >
+                <FiX size={11} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-hidden relative bg-slate-950/30">
+              {renderContent(win.id)}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  )}
+</div>
   );
 }
 
