@@ -6,13 +6,17 @@ const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cloudinary = require('../config/cloudinary');
 const multer = require('multer');
 
+// 1. Storage engine saves the file cleanly with a trailing .pdf extension string
 const cvStorage = new CloudinaryStorage({
   cloudinary,
-  params: async (req, file) => ({
-    folder: 'rafios-cv',
-    resource_type: 'raw',
-    public_id: `cv_${Date.now()}_${Math.floor(Math.random() * 9999)}`,
-  }),
+  params: async (req, file) => {
+    const fileExt = file.originalname.split('.').pop().toLowerCase() || 'pdf';
+    return {
+      folder: 'rafios-cv',
+      resource_type: 'raw', // Keeps the original PDF bytes uncorrupted
+      public_id: `cv_${Date.now()}_${Math.floor(Math.random() * 9999)}.${fileExt}`, 
+    };
+  },
 });
 
 const uploadCV = multer({
@@ -24,6 +28,7 @@ const uploadCV = multer({
   },
 });
 
+// 2. Returns the active .path array payload cleanly to your Next.js route handler
 router.get('/list', async (req, res) => {
   try {
     const cvs = await CV.find().sort({ uploadedAt: -1 });
@@ -34,19 +39,10 @@ router.get('/list', async (req, res) => {
   }
 });
 
-router.get('/items', auth, async (req, res) => {
-  try {
-    const cvs = await CV.find().sort({ uploadedAt: -1 });
-    res.json(cvs.map(c => ({ path: c.path, filename: c.filename, originalName: c.originalName, size: c.size, uploadedAt: c.uploadedAt })));
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch CV items' });
-  }
-});
-
 router.post('/upload', auth, (req, res, next) => {
   uploadCV.single('file')(req, res, (err) => {
     if (err) {
-      console.error('Multer/Cloudinary CV upload error:', err);
+      console.error('Multer CV upload error:', err);
       return res.status(500).json({ success: false, error: err.message || 'Upload failed' });
     }
     next();
@@ -54,34 +50,13 @@ router.post('/upload', auth, (req, res, next) => {
 }, async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ success: false, error: 'No file received' });
-    const path = req.file.path || req.file.secure_url;
-    const filename = req.file.filename || req.file.public_id;
-    const originalName = req.file.originalname || 'CV.pdf';
-
+    
     const cv = new CV({
-      filename,
-      path,
-      originalName,
+      filename: req.file.filename || req.file.public_id,
+      path: req.file.path || req.file.secure_url,
+      originalName: req.file.originalname || 'CV.pdf',
       size: req.file.size || 0,
-      uploadedBy: req.adminId, // or req.user.id depending on auth middleware
-    });
-    await cv.save();
-    res.json({ success: true, cv });
-  } catch (error) {
-    console.error('CV save error:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-router.post('/add-url', auth, async (req, res) => {
-  try {
-    const { url, filename, originalName } = req.body;
-    if (!url) return res.status(400).json({ success: false, error: 'URL is required' });
-    const cv = new CV({
-      filename: filename || url,
-      path: url,
-      originalName: originalName || 'CV.pdf',
-      size: 0,
+      uploadedBy: req.adminId, 
     });
     await cv.save();
     res.json({ success: true, cv });
@@ -90,6 +65,7 @@ router.post('/add-url', auth, async (req, res) => {
   }
 });
 
+// 3. Delete function targets the correct asset engine profile
 router.delete('/delete', auth, async (req, res) => {
   try {
     const { filename } = req.query;
@@ -97,13 +73,13 @@ router.delete('/delete', auth, async (req, res) => {
     if (!cv) return res.status(404).json({ success: false, error: 'CV not found' });
 
     try {
+      // Targets 'raw' storage explicitly so old records clear completely from Cloudinary
       await cloudinary.uploader.destroy(cv.filename, { resource_type: 'raw' });
     } catch (e) { console.warn('Cloudinary delete warning:', e.message); }
 
     await CV.deleteOne({ _id: cv._id });
     res.json({ success: true });
   } catch (error) {
-    console.error('CV delete error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
