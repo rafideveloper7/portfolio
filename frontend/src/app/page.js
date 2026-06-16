@@ -49,52 +49,7 @@ const GRADIENT_MAP = {
 };
 
 const apps = [
-  // --- EXTERNAL SOCIAL MEDIA ACCELERATORS ---
-  {
-    id: "linkedin",
-    label: "LinkedIn",
-    name: "LinkedIn",
-    icon: <FiLinkedin className="w-5 h-5 text-white" />,
-    isExternal: true,
-    url: "https://www.linkedin.com/in/rafideveloper7", // Replace with your links
-    color: "text-blue-500 hover:text-blue-400",
-  },
-  {
-    id: "github",
-    label: "GitHub",
-    name: "GitHub",
-    icon: <FiGithub className="w-5 h-5 text-white" />,
-    isExternal: true,
-    url: "https://github.com/rafideveloper7",
-    color: "text-slate-200 hover:text-white",
-  },
-  {
-    id: "instagram",
-    label: "Instagram",
-    name: "Instagram",
-    icon: <FiInstagram className="w-5 h-5 text-white" />,
-    isExternal: true,
-    url: "https://instagram.com/rafideveloper7",
-    color: "text-pink-500 hover:text-pink-400",
-  },
-  {
-    id: "tiktok",
-    name: "TikTok",
-    label: "TikTok",
-    icon: <BiLogoTiktok className="w-5 h-5 text-white" />,
-    isExternal: true,
-    url: "https://tiktok.com/@rafideveloper7",
-    color: "text-cyan-400 hover:text-cyan-300",
-  },
-  {
-    label: "Facebook",
-    id: "facebook",
-    name: "Facebook",
-    icon: <FiFacebook className="w-5 h-5 text-white" />,
-    isExternal: true,
-    url: "/",
-    color: "text-blue-600 hover:text-blue-500",
-  },
+  
   {
     id: "about",
     label: "About Me",
@@ -168,6 +123,55 @@ const apps = [
     dock: false,
   },
 
+];
+
+const socials = [
+  // --- EXTERNAL SOCIAL MEDIA ACCELERATORS ---
+  {
+    id: "linkedin",
+    label: "LinkedIn",
+    name: "LinkedIn",
+    icon: <FiLinkedin className="w-5 h-5 text-white" />,
+    isExternal: true,
+    url: "https://www.linkedin.com/in/rafideveloper7", // Replace with your links
+    color: "text-blue-500 hover:text-blue-400",
+  },
+  {
+    id: "github",
+    label: "GitHub",
+    name: "GitHub",
+    icon: <FiGithub className="w-5 h-5 text-white" />,
+    isExternal: true,
+    url: "https://github.com/rafideveloper7",
+    color: "text-slate-200 hover:text-white",
+  },
+  {
+    id: "instagram",
+    label: "Instagram",
+    name: "Instagram",
+    icon: <FiInstagram className="w-5 h-5 text-white" />,
+    isExternal: true,
+    url: "https://instagram.com/rafideveloper7",
+    color: "text-pink-500 hover:text-pink-400",
+  },
+  {
+    id: "tiktok",
+    name: "TikTok",
+    label: "TikTok",
+    icon: <BiLogoTiktok className="w-5 h-5 text-white" />,
+    isExternal: true,
+    url: "https://tiktok.com/@rafideveloper7",
+    color: "text-cyan-400 hover:text-cyan-300",
+  },
+  {
+    label: "Facebook",
+    id: "facebook",
+    name: "Facebook",
+    icon: <FiFacebook className="w-5 h-5 text-white" />,
+    isExternal: true,
+    url: "/",
+    color: "text-blue-600 hover:text-blue-500",
+  },
 ];
 
 const statusMessages = [
@@ -855,58 +859,109 @@ export default function HomePage() {
       );
 
     if (id === "cv") {
-      return (
-        <div className="h-full flex flex-col bg-slate-900/60">
-          {/* Top Control Header */}
-          <div className="p-3 border-b border-white/5 flex items-center justify-between bg-black/20 shrink-0 gap-2">
-            <select
-              onChange={(e) => setActiveCvIdx(Number(e.target.value))}
-              value={activeCvIdx}
-              className="bg-slate-950 text-white text-xs border border-white/10 rounded-lg p-1.5 outline-none max-w-[55%] truncate"
-            >
-              {cvs &&
-                cvs.map((c, idx) => (
-                  <option key={idx} value={idx}>
-                    {c.originalName || `CV Entry #${idx + 1}`}
-                  </option>
-                ))}
-            </select>
+  const activeCv = cvs && cvs[activeCvIdx];
 
-            {/* Download Link Block */}
-            {cvs && cvs[activeCvIdx] && (
-              <a
-                href={cvs[activeCvIdx].path || cvs[activeCvIdx].fileUrl}
-                download={cvs[activeCvIdx].originalName || "Download_CV.pdf"}
-                target="_blank"
-                rel="noreferrer"
-                className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 shrink-0"
-              >
-                <FiDownload size={13} /> Download CV
-              </a>
-            )}
-          </div>
+  // ==========================================
+  // 1. CHOOSE THE CORRECT PREVIEW ROUTE
+  // ==========================================
+  const getPreviewUrl = (cvItem) => {
+    if (!cvItem) return "";
+    const url = cvItem.path || cvItem.fileUrl || "";
 
-          {/* Browser Default PDF Layout Workspace Viewport */}
-          <div className="flex-1 relative bg-slate-950">
-            {cvs && cvs[activeCvIdx] ? (
-              /* Using the <embed> tag with type="application/pdf" forces Chrome, Edge, 
-                and Safari to render their native browser PDF application layout view 
-                directly inside the component dimensions.
-              */
-              <embed
-                src={cvs[activeCvIdx].path || cvs[activeCvIdx].fileUrl}
-                type="application/pdf"
-                className="w-full h-full absolute inset-0 border-none bg-slate-950"
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-slate-600 font-mono text-xs">
-                NO_CV_CONTAINERS_LOADED_
-              </div>
-            )}
-          </div>
-        </div>
-      );
+    // If it's Google Drive, it needs the structural web preview layout
+    if (url.includes("drive.google.com")) {
+      return url
+        .replace("/view?usp=sharing", "/preview")
+        .replace("/view", "/preview");
     }
+
+    // For Cloudinary, appending #toolbar=0 prevents downloading from the embedded shell
+    return url;
+  };
+
+  // ==========================================
+  // 2. TRIGGER GENUINE DOWNLOAD VIA BLOB STREAM
+  // ==========================================
+  const handleForceDownload = async (e, cvItem) => {
+    e.preventDefault(); // Stop the default <a> navigation/popup behavior
+    if (!cvItem) return;
+
+    const fileUrl = cvItem.path || cvItem.fileUrl;
+    const saveName = cvItem.originalName || "Download_CV.pdf";
+
+    try {
+      // Fetch the binary array buffer directly from the storage bucket
+      const response = await fetch(fileUrl);
+      const blob = await response.blob();
+      
+      // Virtual download anchor trick
+      const blobUrl = window.URL.createObjectURL(blob);
+      const tempLink = document.createElement("a");
+      tempLink.href = blobUrl;
+      tempLink.download = saveName;
+      
+      document.body.appendChild(tempLink);
+      tempLink.click();
+      
+      // Clean memory leaks instantly
+      document.body.removeChild(tempLink);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Download execution interrupted:", error);
+      // Fallback fallback if CORS policy flags local fetch streams
+      window.open(fileUrl, "_blank");
+    }
+  };
+
+  const activePreviewUrl = getPreviewUrl(activeCv);
+
+  return (
+    <div className="h-full flex flex-col bg-slate-900/60">
+      {/* Top Control Header */}
+      <div className="p-3 border-b border-white/5 flex items-center justify-between bg-black/20 shrink-0 gap-2">
+        <select
+          onChange={(e) => setActiveCvIdx(Number(e.target.value))}
+          value={activeCvIdx}
+          className="bg-slate-950 text-white text-xs border border-white/10 rounded-lg p-1.5 outline-none max-w-[55%] truncate"
+        >
+          {cvs &&
+            cvs.map((c, idx) => (
+              <option key={idx} value={idx}>
+                {c.originalName || `CV Entry #${idx + 1}`}
+              </option>
+            ))}
+        </select>
+
+        {/* Download Link Block */}
+        {activeCv && (
+          <button
+            onClick={(e) => handleForceDownload(e, activeCv)}
+            className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 shrink-0"
+          >
+            <FiDownload size={13} /> Download CV
+          </button>
+        )}
+      </div>
+
+      {/* Embedded App Workspace Viewport */}
+      <div className="flex-1 relative bg-slate-950">
+        {activeCv && activePreviewUrl ? (
+          <iframe
+            key={activeCvIdx} // Forces the iframe context to unmount and reload clean components when switched
+            src={activePreviewUrl}
+            title={activeCv.originalName || "CV Workspace Preview"}
+            className="w-full h-full absolute inset-0 border-none bg-slate-950"
+            allow="autoplay"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-slate-600 font-mono text-xs">
+            NO_CV_CONTAINERS_LOADED_
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
     return null;
   };
 
